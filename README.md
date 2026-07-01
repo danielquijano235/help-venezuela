@@ -15,7 +15,8 @@ muestra un fallback local minimo para que el directorio no quede vacio.
   datos no verificados.
 - Boton "Como llegar" que abre la direccion del centro en Google Maps.
 - Boton "Ver fuente" cuando el dato viene de una publicacion o fuente publica.
-- Scraper server-side en `/api/scrape-centros`, programado con Vercel Cron cada 6 horas.
+- Scraper server-side en `/api/scrape-centros`, programado con Vercel Cron una vez al dia
+  (el plan gratuito de Vercel solo permite crons diarios).
 - Formulario publico `/agregar` para sugerir nuevos centros. Los envios quedan como
   `verificado = false` hasta revision manual.
 
@@ -64,7 +65,7 @@ muestra un fallback local minimo para que el directorio no quede vacio.
 
 El navegador no hace scraping. El flujo es:
 
-1. Vercel Cron llama `/api/scrape-centros` cada 6 horas.
+1. Vercel Cron llama `/api/scrape-centros` una vez al dia.
 2. La funcion lee fuentes publicas: el directorio de Red por Venezuela, mas una semilla
    conservadora de puntos reportados por medios (El Tiempo, Vanguardia, La Opinion, El
    Heraldo, TuBarco Noticias) en Bogota, Medellin, Bucaramanga, Cucuta, Barranquilla y

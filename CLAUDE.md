@@ -52,7 +52,9 @@ If Supabase is unavailable or missing env vars, `useCentros` falls back to
 `src/data/fallbackCentros.ts` so the directory is never empty solely because the network is
 down.
 
-`api/scrape-centros.ts` is called by Vercel Cron every 6 hours (`vercel.json`). It fetches
+`api/scrape-centros.ts` is called by Vercel Cron once a day (`vercel.json`) — the Hobby
+plan only allows daily cron schedules, so this isn't every 6h despite the original design
+intent. It fetches
 public sources, normalizes centers, and upserts into Supabase by `(fuente_nombre,
 external_id)`. Imported rows stay `verificado = false` until manual moderation. The route
 checks `Authorization: Bearer <secret>` against `SCRAPER_CRON_SECRET` (falling back to
