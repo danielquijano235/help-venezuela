@@ -1,4 +1,5 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { useCentros } from '../hooks/useCentros';
 import { FilterBar } from '../components/FilterBar';
@@ -6,13 +7,19 @@ import { CenterCard } from '../components/CenterCard';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { EmptyState } from '../components/EmptyState';
 import { ActionCards } from '../components/ActionCards';
+import { ESTADOS } from '../data/constants';
 import type { Estado, TipoDonacion } from '../types/centro';
 
 export function ListingPage() {
   const { centros, loading, error, usingFallback, retry } = useCentros();
   const directoryRef = useRef<HTMLDivElement>(null);
+  const [searchParams] = useSearchParams();
   const [ciudad, setCiudad] = useState('');
-  const [estado, setEstado] = useState<Estado | ''>('');
+  const [estado, setEstado] = useState<Estado | ''>(() => {
+    const estadoParam = searchParams.get('estado');
+    return ESTADOS.some((e) => e.value === estadoParam) ? (estadoParam as Estado) : '';
+  });
+  const [hadEstadoParam] = useState(() => Boolean(searchParams.get('estado')));
   const [soloVerificados, setSoloVerificados] = useState(false);
   const [tiposSeleccionados, setTiposSeleccionados] = useState<TipoDonacion[]>([]);
   const [query, setQuery] = useState('');
@@ -72,16 +79,14 @@ export function ListingPage() {
     });
   }
 
+  useEffect(() => {
+    if (hadEstadoParam) {
+      scrollToDirectory();
+    }
+  }, [hadEstadoParam]);
+
   function showAllCenters() {
     clearFilters();
-    scrollToDirectory();
-  }
-
-  function selectStatus(nextEstado: Estado) {
-    setEstado(nextEstado);
-    setSoloVerificados(false);
-    setTiposSeleccionados([]);
-    setQuery('');
     scrollToDirectory();
   }
 
@@ -93,14 +98,6 @@ export function ListingPage() {
     scrollToDirectory();
   }
 
-  function searchDirectory(nextQuery: string) {
-    setEstado('');
-    setSoloVerificados(false);
-    setTiposSeleccionados([]);
-    setQuery(nextQuery);
-    scrollToDirectory();
-  }
-
   return (
     <main className="mx-auto max-w-6xl px-4 py-8">
       <ActionCards
@@ -109,9 +106,7 @@ export function ListingPage() {
         verifiedCount={verifiedCount}
         cityCount={cityCount}
         onShowAll={showAllCenters}
-        onSelectStatus={selectStatus}
         onSelectDonation={selectDonation}
-        onSearch={searchDirectory}
       />
 
       <section

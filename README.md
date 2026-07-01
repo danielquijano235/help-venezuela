@@ -19,6 +19,10 @@ muestra un fallback local minimo para que el directorio no quede vacio.
   (el plan gratuito de Vercel solo permite crons diarios).
 - Formulario publico `/agregar` para sugerir nuevos centros. Los envios quedan como
   `verificado = false` hasta revision manual.
+- `/ayuda`: servicios y contactos de emergencia reales (Cruz Roja, atencion psicosocial,
+  etc.), con link directo a los centros urgentes del directorio.
+- `/noticias`: noticias reales sobre los terremotos y la respuesta humanitaria, con fuente
+  citada en cada nota.
 
 ## Requisitos
 
@@ -37,8 +41,11 @@ muestra un fallback local minimo para que el directorio no quede vacio.
 
 2. Crear un proyecto en Supabase y ejecutar en el SQL Editor:
 
-   - `supabase/schema.sql` para crear la tabla y politicas de RLS.
-   - `supabase/seed.sql` para cargar la primera tanda real conservadora.
+   - `supabase/schema.sql` para crear las tablas (`centros`, `noticias`, `servicios_ayuda`)
+     y sus politicas de RLS.
+   - `supabase/seed.sql` para cargar la primera tanda real conservadora de centros.
+   - `supabase/seed_noticias.sql` y `supabase/seed_servicios_ayuda.sql` para cargar las
+     noticias y los servicios de ayuda reales que alimentan `/noticias` y `/ayuda`.
 
    Si la tabla ya existia antes de los campos del scraper, ejecutar una vez:
 
@@ -95,6 +102,10 @@ real vive en las politicas de Row Level Security definidas en `supabase/schema.s
 
 La moderacion se hace manualmente desde el Table Editor de Supabase cambiando `verificado`
 a `true`.
+
+Las tablas `noticias` y `servicios_ayuda` son de solo lectura publica: no tienen politica de
+`insert` (ni de `update`/`delete`), asi que solo se administran a mano desde Supabase. No hay
+formulario publico que las alimente.
 
 ## Deploy
 

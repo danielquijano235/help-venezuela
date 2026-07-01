@@ -61,3 +61,67 @@ create policy "centros_public_insert"
 -- por defecto, asi que la anon key nunca puede editar ni borrar filas.
 -- La verificacion/moderacion se hace manualmente desde el Table Editor de
 -- Supabase (con la sesion del dueno del proyecto, no con la anon key).
+
+-- Noticias -----------------------------------------------------------------
+-- Contenido 100% editorial: se carga a mano via SQL Editor (ver
+-- seed_noticias.sql), no hay formulario publico que la alimente, por eso no
+-- existe columna `verificado` ni policy de insert.
+
+create table if not exists public.noticias (
+  id                uuid primary key default gen_random_uuid(),
+  created_at        timestamptz not null default now(),
+  titulo            text not null,
+  resumen           text not null,
+  fecha_publicacion timestamptz not null,
+  ciudad            text,
+  fuente_nombre     text not null,
+  fuente_url        text not null,
+  confianza         text not null default 'media'
+                      check (confianza in ('alta', 'media', 'baja'))
+);
+
+alter table public.noticias enable row level security;
+
+create policy "noticias_public_select"
+  on public.noticias for select
+  to anon, authenticated
+  using (true);
+
+-- Sin policy de insert/update/delete: RLS deniega esas operaciones para
+-- anon/authenticated. El contenido se administra desde el Table Editor.
+
+-- Servicios de ayuda ---------------------------------------------------------
+-- Igual que noticias: contactos/servicios de emergencia curados a mano
+-- (ver seed_servicios_ayuda.sql), sin insert publico.
+
+create table if not exists public.servicios_ayuda (
+  id             uuid primary key default gen_random_uuid(),
+  created_at     timestamptz not null default now(),
+  nombre         text not null,
+  categoria      text not null
+                   check (categoria in (
+                     'emergencia',
+                     'medico',
+                     'psicosocial',
+                     'legal',
+                     'refugio',
+                     'otros'
+                   )),
+  descripcion    text not null,
+  direccion      text,
+  telefono       text,
+  whatsapp       text,
+  email          text,
+  ciudad         text,
+  fuente_nombre  text not null,
+  fuente_url     text not null,
+  confianza      text not null default 'media'
+                   check (confianza in ('alta', 'media', 'baja'))
+);
+
+alter table public.servicios_ayuda enable row level security;
+
+create policy "servicios_ayuda_public_select"
+  on public.servicios_ayuda for select
+  to anon, authenticated
+  using (true);

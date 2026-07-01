@@ -43,6 +43,14 @@ vigencia warning. This is a product decision for emergency-response info.
 `Estado` and `TipoDonacion` as UI-facing arrays (labels/icons for filters and the add-center
 form) — `confianza` has no such array since it isn't rendered in the UI yet.
 
+`schema.sql` also defines `public.noticias` and `public.servicios_ayuda` — editorial content
+(news and emergency/help contacts) curated by hand via the SQL editor, loaded once with
+`supabase/seed_noticias.sql` / `supabase/seed_servicios_ayuda.sql`. Unlike `centros`, neither
+table has an `insert` RLS policy at all (public clients can only `select`), since there's no
+public submission form feeding them — everything in these two tables is team-curated, so
+there's no `verificado` column either. `src/types/noticia.ts` and
+`src/types/servicioAyuda.ts` mirror their check-constraint values (`confianza`, `categoria`).
+
 ### Data flow
 
 `src/hooks/useCentros.ts` fetches the full `centros` table once on mount. All filtering
@@ -74,12 +82,25 @@ and append it to the `centros` array in the handler.
 `src/lib/maps.ts` builds a Google Maps search URL from plain address text. There is no
 geocoding API integration.
 
+`src/hooks/useNoticias.ts` and `src/hooks/useServiciosAyuda.ts` mirror `useCentros.ts`'s
+shape exactly (fetch on mount, loading/error state, local fallback) — deliberately not
+abstracted into a shared generic hook, consistent with the rest of the codebase not
+abstracting this pattern either.
+
 ### Routing
 
-Two SPA routes are wired in `src/App.tsx`: `/` (`ListingPage`) and `/agregar`
-(`AddCenterPage`), plus a catch-all `*` route rendering `NotFoundPage`. `vercel.json` and
-`public/_redirects` rewrite SPA routes to `index.html`; Vercel API routes still live under
-`/api/*`.
+Four SPA routes are wired in `src/App.tsx`: `/` (`ListingPage`), `/agregar`
+(`AddCenterPage`), `/ayuda` (`AyudaPage` — emergency/help services from
+`servicios_ayuda`), `/noticias` (`NoticiasPage` — news from `noticias`), plus a catch-all
+`*` route rendering `NotFoundPage`. `vercel.json` and `public/_redirects` rewrite SPA
+routes to `index.html`; Vercel API routes still live under `/api/*`.
+
+The 4 homepage "puertas" in `src/components/ActionCards.tsx` each resolve to one real
+destination now: Puerta 01 ("Necesito ayuda") → `/ayuda` (plus a link straight to
+`/?estado=urgente` for the urgent-centros shortcut), Puerta 02 ("Quiero ayudar") → the
+directory on `/`, Puerta 03 ("Quiero entender") → `/noticias`, Puerta 04 → `/agregar`.
+`ListingPage` reads `?estado=` from the URL on mount (via `useSearchParams`) to support
+that deep link from `/ayuda`.
 
 ### Styling
 

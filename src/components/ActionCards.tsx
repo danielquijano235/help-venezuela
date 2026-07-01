@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, BookOpen, HandHeart, Megaphone, ShieldAlert } from 'lucide-react';
-import type { Estado, TipoDonacion } from '../types/centro';
+import type { TipoDonacion } from '../types/centro';
 
 interface ActionCardsProps {
   centrosCount: number;
@@ -8,9 +8,7 @@ interface ActionCardsProps {
   verifiedCount: number;
   cityCount: number;
   onShowAll: () => void;
-  onSelectStatus: (estado: Estado) => void;
   onSelectDonation: (tipo: TipoDonacion) => void;
-  onSearch: (query: string) => void;
 }
 
 export function ActionCards({
@@ -19,9 +17,7 @@ export function ActionCards({
   verifiedCount,
   cityCount,
   onShowAll,
-  onSelectStatus,
   onSelectDonation,
-  onSearch,
 }: ActionCardsProps) {
   return (
     <section className="py-8 sm:py-10" aria-labelledby="intent-heading">
@@ -56,11 +52,11 @@ export function ActionCards({
           title="Necesito ayuda"
           description="Estás en peligro o necesitas algo urgente ahora mismo."
           actions={[
-            { label: 'SOS y rescate', count: urgentCount, onClick: () => onSelectStatus('urgente') },
-            { label: 'Servicios: médico, refugio, legal', count: verifiedCount, onClick: onShowAll },
-            { label: 'Agua y medicina cerca', count: 'mapa', onClick: () => onSelectDonation('medicina') },
+            { label: 'Centros urgentes cerca de ti', count: urgentCount, href: '/?estado=urgente' },
+            { label: 'Líneas de emergencia y rescate', count: 'línea', href: '/ayuda' },
+            { label: 'Apoyo médico y psicosocial', count: 'ver', href: '/ayuda' },
           ]}
-          cta={{ label: 'Ver ayuda cerca de mí', onClick: onShowAll, className: 'bg-signal hover:bg-signal-dark' }}
+          cta={{ label: 'Ver ayuda cerca de mí', href: '/ayuda', className: 'bg-signal hover:bg-signal-dark' }}
         />
 
         <Ticket
@@ -86,11 +82,11 @@ export function ActionCards({
           title="Quiero entender"
           description="Busca información confiable, oficial y al día."
           actions={[
-            { label: 'Fuentes verificadas', count: verifiedCount, onClick: onShowAll },
-            { label: 'Necesidades por ciudad', count: cityCount, onClick: onShowAll },
-            { label: 'Buscar en el índice', count: 'buscar', onClick: () => onSearch('') },
+            { label: 'Noticias verificadas', count: 'noticias', href: '/noticias' },
+            { label: 'Qué está pasando y cómo va la ayuda', count: 'ver', href: '/noticias' },
+            { label: 'Centros por ciudad', count: cityCount, onClick: onShowAll },
           ]}
-          cta={{ label: 'Ver el panorama', onClick: onShowAll, className: 'bg-flag hover:bg-flag-dark' }}
+          cta={{ label: 'Ver noticias e información', href: '/noticias', className: 'bg-flag hover:bg-flag-dark' }}
         />
 
         <Ticket
