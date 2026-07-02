@@ -4,6 +4,7 @@ import { Plus } from 'lucide-react';
 const NAV_LINKS = [
   { to: '/', label: 'Inicio', end: true },
   { to: '/ayuda', label: 'Ayuda' },
+  { to: '/mapa', label: 'Mapa' },
   { to: '/noticias', label: 'Noticias' },
 ];
 

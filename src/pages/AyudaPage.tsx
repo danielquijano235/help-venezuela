@@ -35,12 +35,20 @@ export function AyudaPage() {
         familiares.
       </p>
 
-      <Link
-        to="/?estado=urgente"
-        className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-lg bg-signal px-4 font-mono text-sm font-semibold uppercase tracking-wide text-paper hover:bg-signal-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
-      >
-        Ver centros de acopio urgentes
-      </Link>
+      <div className="mt-4 flex flex-wrap gap-3">
+        <Link
+          to="/?estado=urgente"
+          className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-signal px-4 font-mono text-sm font-semibold uppercase tracking-wide text-paper hover:bg-signal-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+        >
+          Ver centros de acopio urgentes
+        </Link>
+        <Link
+          to="/mapa"
+          className="inline-flex min-h-11 items-center gap-2 rounded-lg border-2 border-ink px-4 font-mono text-sm font-semibold uppercase tracking-wide text-ink hover:border-signal hover:text-signal focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+        >
+          Ver en el mapa
+        </Link>
+      </div>
 
       {!loading && error && usingFallback && (
         <div className="mt-6 flex flex-col gap-3 rounded-lg border border-flag/40 bg-flag/10 p-4 text-sm text-ink sm:flex-row sm:items-center sm:justify-between">
