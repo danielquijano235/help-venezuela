@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { BackLink } from '../components/BackLink';
 
 export function NotFoundPage() {
   return (
@@ -7,9 +7,7 @@ export function NotFoundPage() {
         Página no encontrada
       </h1>
       <p className="text-ink/70">La página que buscas no existe.</p>
-      <Link to="/" className="font-medium text-signal hover:text-signal-dark">
-        Volver al listado de centros
-      </Link>
+      <BackLink to="/" label="Volver al listado de centros" />
     </main>
   );
 }

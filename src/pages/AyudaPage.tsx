@@ -4,6 +4,7 @@ import { useServiciosAyuda } from '../hooks/useServiciosAyuda';
 import { useCentrosVenezuela } from '../hooks/useCentrosVenezuela';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { CenterCard } from '../components/CenterCard';
+import { BackLink } from '../components/BackLink';
 import { CATEGORIAS_SERVICIO } from '../data/constants';
 import { buildWhatsappUrl } from '../lib/maps';
 
@@ -22,7 +23,8 @@ export function AyudaPage() {
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
-      <p className="font-mono text-xs font-semibold uppercase tracking-wider text-signal">
+      <BackLink to="/" label="Volver al inicio" />
+      <p className="mt-4 font-mono text-xs font-semibold uppercase tracking-wider text-signal">
         Necesito ayuda
       </p>
       <h1 className="mt-1 font-display text-3xl font-extrabold uppercase leading-none tracking-tight text-ink sm:text-4xl">
@@ -35,7 +37,7 @@ export function AyudaPage() {
 
       <Link
         to="/?estado=urgente"
-        className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-lg bg-signal px-4 font-mono text-sm font-semibold uppercase tracking-wide text-paper hover:bg-signal-dark"
+        className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-lg bg-signal px-4 font-mono text-sm font-semibold uppercase tracking-wide text-paper hover:bg-signal-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
       >
         Ver centros de acopio urgentes
       </Link>
@@ -52,7 +54,7 @@ export function AyudaPage() {
           <button
             type="button"
             onClick={retry}
-            className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-ink/15 bg-white px-3 font-mono text-xs font-semibold uppercase tracking-wide text-ink transition-colors hover:border-ink/40"
+            className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-ink/15 bg-white px-3 font-mono text-xs font-semibold uppercase tracking-wide text-ink transition-colors hover:border-ink/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-route"
           >
             <RefreshCw className="h-3.5 w-3.5" />
             Reintentar
@@ -136,7 +138,7 @@ export function AyudaPage() {
                         {servicio.telefono && (
                           <a
                             href={`tel:${servicio.telefono}`}
-                            className="flex items-center gap-1 text-ink/60 hover:text-ink"
+                            className="flex items-center gap-1 text-ink/60 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-route"
                           >
                             <Phone className="h-4 w-4" />
                             {servicio.telefono}
@@ -148,7 +150,7 @@ export function AyudaPage() {
                             href={buildWhatsappUrl(servicio.whatsapp)}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-1 text-ink/60 hover:text-ink"
+                            className="flex items-center gap-1 text-ink/60 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-route"
                           >
                             <MessageCircle className="h-4 w-4" />
                             WhatsApp
@@ -158,7 +160,7 @@ export function AyudaPage() {
                         {servicio.email && (
                           <a
                             href={`mailto:${servicio.email}`}
-                            className="flex items-center gap-1 text-ink/60 hover:text-ink"
+                            className="flex items-center gap-1 text-ink/60 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-route"
                           >
                             <Mail className="h-4 w-4" />
                             {servicio.email}

@@ -68,7 +68,7 @@ export function FilterBar({
           <button
             type="button"
             onClick={onClearFilters}
-            className="min-h-9 rounded-full border border-ink/20 px-3 font-mono text-xs font-semibold uppercase tracking-wide text-ink/65 transition-colors hover:border-ink/50 hover:text-ink"
+            className="min-h-9 rounded-full border border-ink/20 px-3 font-mono text-xs font-semibold uppercase tracking-wide text-ink/65 transition-colors hover:border-ink/50 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-route"
           >
             Limpiar filtros
           </button>
@@ -79,7 +79,7 @@ export function FilterBar({
         <button
           type="button"
           onClick={() => onEstadoChange('')}
-          className={`rounded-full border px-3 py-1.5 font-mono text-xs font-medium uppercase tracking-wide transition-colors ${
+          className={`rounded-full border px-3 py-1.5 font-mono text-xs font-medium uppercase tracking-wide transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-route ${
             estado === ''
               ? 'border-ink bg-ink text-paper'
               : 'border-ink/20 bg-white text-ink/70 hover:border-ink/40'
@@ -94,7 +94,7 @@ export function FilterBar({
               key={value}
               type="button"
               onClick={() => onEstadoChange(value)}
-              className={`rounded-full border px-3 py-1.5 font-mono text-xs font-medium uppercase tracking-wide transition-colors ${
+              className={`rounded-full border px-3 py-1.5 font-mono text-xs font-medium uppercase tracking-wide transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-route ${
                 active
                   ? 'border-signal bg-signal text-paper'
                   : 'border-ink/20 bg-white text-ink/70 hover:border-signal/50'
@@ -114,7 +114,7 @@ export function FilterBar({
               key={value}
               type="button"
               onClick={() => onToggleTipo(value)}
-              className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors ${
+              className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-route ${
                 active
                   ? 'border-route bg-route text-paper'
                   : 'border-ink/20 bg-white text-ink/70 hover:border-route/50'

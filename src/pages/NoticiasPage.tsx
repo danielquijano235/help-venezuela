@@ -1,13 +1,15 @@
 import { AlertTriangle, CalendarClock, ExternalLink, RefreshCw } from 'lucide-react';
 import { useNoticias } from '../hooks/useNoticias';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { BackLink } from '../components/BackLink';
 
 export function NoticiasPage() {
   const { noticias, loading, error, usingFallback, retry } = useNoticias();
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
-      <p className="font-mono text-xs font-semibold uppercase tracking-wider text-flag">
+      <BackLink to="/" label="Volver al inicio" />
+      <p className="mt-4 font-mono text-xs font-semibold uppercase tracking-wider text-flag">
         Quiero entender
       </p>
       <h1 className="mt-1 font-display text-3xl font-extrabold uppercase leading-none tracking-tight text-ink sm:text-4xl">
@@ -30,7 +32,7 @@ export function NoticiasPage() {
           <button
             type="button"
             onClick={retry}
-            className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-ink/15 bg-white px-3 font-mono text-xs font-semibold uppercase tracking-wide text-ink transition-colors hover:border-ink/40"
+            className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-ink/15 bg-white px-3 font-mono text-xs font-semibold uppercase tracking-wide text-ink transition-colors hover:border-ink/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-route"
           >
             <RefreshCw className="h-3.5 w-3.5" />
             Reintentar
@@ -74,7 +76,7 @@ export function NoticiasPage() {
                 href={noticia.fuente_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-1 flex w-fit items-center gap-1 text-sm font-medium text-ink/60 hover:text-ink"
+                className="mt-1 flex w-fit items-center gap-1 text-sm font-medium text-ink/60 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-route"
               >
                 <ExternalLink className="h-4 w-4" />
                 Fuente: {noticia.fuente_nombre}

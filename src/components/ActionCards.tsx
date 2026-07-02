@@ -160,7 +160,7 @@ function Ticket({ number, accent, icon: Icon, eyebrow, title, description, actio
         {cta.href ? (
           <Link
             to={cta.href}
-            className={`mt-auto flex min-h-11 items-center justify-center rounded-lg px-4 font-mono text-sm font-semibold uppercase tracking-wide text-paper transition-colors ${cta.className}`}
+            className={`mt-auto flex min-h-11 items-center justify-center rounded-lg px-4 font-mono text-sm font-semibold uppercase tracking-wide text-paper transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink ${cta.className}`}
           >
             {cta.label}
           </Link>
@@ -168,7 +168,7 @@ function Ticket({ number, accent, icon: Icon, eyebrow, title, description, actio
           <button
             type="button"
             onClick={cta.onClick}
-            className={`mt-auto flex min-h-11 items-center justify-center rounded-lg px-4 font-mono text-sm font-semibold uppercase tracking-wide text-paper transition-colors ${cta.className}`}
+            className={`mt-auto flex min-h-11 items-center justify-center rounded-lg px-4 font-mono text-sm font-semibold uppercase tracking-wide text-paper transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink ${cta.className}`}
           >
             {cta.label}
           </button>
@@ -191,7 +191,10 @@ function TicketAction({ label, count, onClick, href }: TicketAction) {
 
   if (href) {
     return (
-      <Link to={href} className="flex w-full items-center gap-3 text-left transition-colors hover:text-signal">
+      <Link
+        to={href}
+        className="flex w-full items-center gap-3 text-left transition-colors hover:text-signal focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-route"
+      >
         {content}
       </Link>
     );
@@ -201,7 +204,7 @@ function TicketAction({ label, count, onClick, href }: TicketAction) {
     <button
       type="button"
       onClick={onClick}
-      className="flex w-full items-center gap-3 text-left transition-colors hover:text-signal"
+      className="flex w-full items-center gap-3 text-left transition-colors hover:text-signal focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-route"
     >
       {content}
     </button>

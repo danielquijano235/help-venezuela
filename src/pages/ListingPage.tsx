@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { AlertTriangle, ArrowUp, RefreshCw } from 'lucide-react';
 import { useCentros } from '../hooks/useCentros';
 import { FilterBar } from '../components/FilterBar';
 import { CenterCard } from '../components/CenterCard';
@@ -12,6 +12,7 @@ import type { Estado, TipoDonacion } from '../types/centro';
 
 export function ListingPage() {
   const { centros, loading, error, usingFallback, retry } = useCentros();
+  const topRef = useRef<HTMLDivElement>(null);
   const directoryRef = useRef<HTMLDivElement>(null);
   const [searchParams] = useSearchParams();
   const [ciudad, setCiudad] = useState('');
@@ -79,6 +80,12 @@ export function ListingPage() {
     });
   }
 
+  function scrollToTop() {
+    window.requestAnimationFrame(() => {
+      topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+
   useEffect(() => {
     if (hadEstadoParam) {
       scrollToDirectory();
@@ -100,6 +107,7 @@ export function ListingPage() {
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-8">
+      <div ref={topRef} />
       <ActionCards
         centrosCount={centros.length}
         urgentCount={urgentCount}
@@ -162,7 +170,7 @@ export function ListingPage() {
               <button
                 type="button"
                 onClick={retry}
-                className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-ink/15 bg-white px-3 font-mono text-xs font-semibold uppercase tracking-wide text-ink transition-colors hover:border-ink/40"
+                className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-ink/15 bg-white px-3 font-mono text-xs font-semibold uppercase tracking-wide text-ink transition-colors hover:border-ink/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-route"
               >
                 <RefreshCw className="h-3.5 w-3.5" />
                 Reintentar
@@ -179,11 +187,22 @@ export function ListingPage() {
           {!loading && centrosFiltrados.length === 0 && <EmptyState />}
 
           {!loading && centrosFiltrados.length > 0 && (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {centrosFiltrados.map((centro) => (
-                <CenterCard key={centro.id} centro={centro} />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {centrosFiltrados.map((centro) => (
+                  <CenterCard key={centro.id} centro={centro} />
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onClick={scrollToTop}
+                className="mx-auto mt-6 flex items-center gap-1.5 rounded-lg border border-ink/15 bg-white px-3 py-2 font-mono text-xs font-semibold uppercase tracking-wide text-ink/70 transition-colors hover:border-ink/40 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-route"
+              >
+                <ArrowUp className="h-3.5 w-3.5" />
+                Volver arriba
+              </button>
+            </>
           )}
         </div>
       </section>

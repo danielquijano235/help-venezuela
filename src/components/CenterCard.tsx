@@ -59,7 +59,7 @@ export function CenterCard({ centro }: CenterCardProps) {
           href={buildGoogleMapsUrl(centro.direccion, centro.ciudad, centro.pais)}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-1 font-medium text-signal hover:text-signal-dark"
+          className="flex items-center gap-1 font-medium text-signal hover:text-signal-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-route"
         >
           <MapPin className="h-4 w-4" />
           Cómo llegar
@@ -68,7 +68,7 @@ export function CenterCard({ centro }: CenterCardProps) {
         {centro.telefono && (
           <a
             href={`tel:${centro.telefono}`}
-            className="flex items-center gap-1 text-ink/60 hover:text-ink"
+            className="flex items-center gap-1 text-ink/60 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-route"
           >
             <Phone className="h-4 w-4" />
             Llamar
@@ -80,7 +80,7 @@ export function CenterCard({ centro }: CenterCardProps) {
             href={buildWhatsappUrl(centro.whatsapp)}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1 text-ink/60 hover:text-ink"
+            className="flex items-center gap-1 text-ink/60 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-route"
           >
             <MessageCircle className="h-4 w-4" />
             WhatsApp
@@ -92,7 +92,7 @@ export function CenterCard({ centro }: CenterCardProps) {
             href={fuenteUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1 text-ink/60 hover:text-ink"
+            className="flex items-center gap-1 text-ink/60 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-route"
           >
             <ExternalLink className="h-4 w-4" />
             Ver fuente

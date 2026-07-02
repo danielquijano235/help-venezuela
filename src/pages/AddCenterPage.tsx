@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
 import { supabase, supabaseConfigError } from '../lib/supabaseClient';
 import { CIUDADES, TIPOS_DONACION } from '../data/constants';
+import { BackLink } from '../components/BackLink';
 import type { NewCentro, TipoDonacion } from '../types/centro';
 
 const initialForm = {
@@ -89,7 +90,7 @@ export function AddCenterPage() {
         </p>
         <Link
           to="/"
-          className="mt-6 inline-block rounded-lg bg-signal px-4 py-2 font-mono text-sm font-semibold uppercase tracking-wide text-paper hover:bg-signal-dark"
+          className="mt-6 inline-block rounded-lg bg-signal px-4 py-2 font-mono text-sm font-semibold uppercase tracking-wide text-paper hover:bg-signal-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-route"
         >
           Ver listado de centros
         </Link>
@@ -99,7 +100,8 @@ export function AddCenterPage() {
 
   return (
     <main className="mx-auto max-w-xl px-4 py-8">
-      <h1 className="font-display text-3xl font-extrabold uppercase tracking-tight text-ink">
+      <BackLink to="/" label="Volver al inicio" />
+      <h1 className="mt-4 font-display text-3xl font-extrabold uppercase tracking-tight text-ink">
         Agregar centro de acopio
       </h1>
       <p className="mt-1 text-ink/70">
