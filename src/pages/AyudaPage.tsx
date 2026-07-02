@@ -1,12 +1,19 @@
 import { AlertTriangle, ExternalLink, Mail, MapPin, MessageCircle, Phone, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useServiciosAyuda } from '../hooks/useServiciosAyuda';
+import { useCentrosVenezuela } from '../hooks/useCentrosVenezuela';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { CenterCard } from '../components/CenterCard';
 import { CATEGORIAS_SERVICIO } from '../data/constants';
 import { buildWhatsappUrl } from '../lib/maps';
 
 export function AyudaPage() {
   const { servicios, loading, error, usingFallback, retry } = useServiciosAyuda();
+  const {
+    centros: centrosVenezuela,
+    loading: loadingCentrosVenezuela,
+    error: errorCentrosVenezuela,
+  } = useCentrosVenezuela();
 
   const porCategoria = CATEGORIAS_SERVICIO.map((categoria) => ({
     ...categoria,
@@ -59,7 +66,37 @@ export function AyudaPage() {
         </p>
       )}
 
-      <div className="mt-6 flex flex-col gap-6">
+      <section className="mt-8 flex flex-col gap-3">
+        <h2 className="font-display text-lg font-bold uppercase tracking-tight text-ink">
+          Centros de acopio en Venezuela
+        </h2>
+        <p className="text-sm text-ink/70">
+          Puntos dentro de Venezuela para recibir o llevar ayuda, tomados en vivo del
+          directorio de Red por Venezuela.
+        </p>
+
+        {loadingCentrosVenezuela && <LoadingSpinner label="Cargando centros en Venezuela..." />}
+
+        {!loadingCentrosVenezuela && !errorCentrosVenezuela && centrosVenezuela.length === 0 && (
+          <p className="py-8 text-center text-sm text-ink/50">
+            Todavía no hay centros de Venezuela cargados.
+          </p>
+        )}
+
+        {!loadingCentrosVenezuela && centrosVenezuela.length > 0 && (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {centrosVenezuela.map((centro) => (
+              <CenterCard key={centro.id} centro={centro} />
+            ))}
+          </div>
+        )}
+      </section>
+
+      <div className="mt-8 flex flex-col gap-6">
+        <h2 className="font-display text-lg font-bold uppercase tracking-tight text-ink">
+          Líneas y contactos de ayuda
+        </h2>
+
         {loading && <LoadingSpinner label="Cargando servicios de ayuda..." />}
 
         {!loading && !error && servicios.length === 0 && (

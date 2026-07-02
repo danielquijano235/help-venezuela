@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
-import { FALLBACK_CENTROS } from '../data/fallbackCentros';
+import { FALLBACK_CENTROS_VENEZUELA } from '../data/fallbackCentrosVenezuela';
 import { supabase, supabaseConfigError } from '../lib/supabaseClient';
 import type { Centro } from '../types/centro';
 
-interface UseCentrosResult {
+interface UseCentrosVenezuelaResult {
   centros: Centro[];
   loading: boolean;
   error: string | null;
@@ -11,7 +11,7 @@ interface UseCentrosResult {
   retry: () => void;
 }
 
-export function useCentros(): UseCentrosResult {
+export function useCentrosVenezuela(): UseCentrosVenezuelaResult {
   const [centros, setCentros] = useState<Centro[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +31,7 @@ export function useCentros(): UseCentrosResult {
       setUsingFallback(false);
 
       if (!supabase) {
-        setCentros(FALLBACK_CENTROS);
+        setCentros(FALLBACK_CENTROS_VENEZUELA);
         setError(supabaseConfigError);
         setUsingFallback(true);
         setLoading(false);
@@ -41,7 +41,7 @@ export function useCentros(): UseCentrosResult {
       const { data, error: fetchError } = await supabase
         .from('centros')
         .select('*')
-        .eq('pais', 'Colombia')
+        .eq('pais', 'Venezuela')
         .order('estado', { ascending: true })
         .order('created_at', { ascending: false });
 
@@ -49,7 +49,7 @@ export function useCentros(): UseCentrosResult {
 
       if (fetchError) {
         setError(fetchError.message);
-        setCentros(FALLBACK_CENTROS);
+        setCentros(FALLBACK_CENTROS_VENEZUELA);
         setUsingFallback(true);
       } else {
         setCentros(data ?? []);

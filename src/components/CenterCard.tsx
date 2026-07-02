@@ -56,7 +56,7 @@ export function CenterCard({ centro }: CenterCardProps) {
 
       <div className="mt-1 flex flex-wrap items-center gap-3 border-t border-ink/10 pt-3 text-sm">
         <a
-          href={buildGoogleMapsUrl(centro.direccion, centro.ciudad)}
+          href={buildGoogleMapsUrl(centro.direccion, centro.ciudad, centro.pais)}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-1 font-medium text-signal hover:text-signal-dark"

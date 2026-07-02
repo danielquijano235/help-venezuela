@@ -6,6 +6,7 @@ const fuenteUrl =
 const baseCentro = {
   created_at: '2026-06-27T12:00:00-05:00',
   organizacion: 'Bomberos Oficiales de Bogotá / IDPYBA',
+  pais: 'Colombia',
   ciudad: 'Bogotá',
   estado: 'activo',
   tipos_donacion: ['mascotas', 'comida', 'medicina', 'otros'],

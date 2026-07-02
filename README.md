@@ -19,8 +19,11 @@ muestra un fallback local minimo para que el directorio no quede vacio.
   (el plan gratuito de Vercel solo permite crons diarios).
 - Formulario publico `/agregar` para sugerir nuevos centros. Los envios quedan como
   `verificado = false` hasta revision manual.
-- `/ayuda`: servicios y contactos de emergencia reales (Cruz Roja, atencion psicosocial,
-  etc.), con link directo a los centros urgentes del directorio.
+- `/ayuda`: pensada para alguien que necesita ayuda **dentro de Venezuela** (no para quien
+  dona desde Colombia) — centros de acopio en Venezuela (tomados en vivo de Red por
+  Venezuela) y servicios/contactos de emergencia reales (Cruz Roja, atencion psicosocial,
+  lineas nacionales de emergencia de Venezuela, etc.), con link directo a los centros
+  urgentes del directorio de Colombia tambien.
 - `/noticias`: noticias reales sobre los terremotos y la respuesta humanitaria, con fuente
   citada en cada nota.
 - Noticias y servicios de ayuda tambien se mantienen al dia solos: `/api/sync-informacion`
@@ -49,10 +52,11 @@ muestra un fallback local minimo para que el directorio no quede vacio.
    - `supabase/seed_noticias.sql` y `supabase/seed_servicios_ayuda.sql` para cargar las
      noticias y los servicios de ayuda reales que alimentan `/noticias` y `/ayuda`.
 
-   Si la tabla ya existia antes de los campos del scraper, ejecutar una vez:
+   Si la tabla `centros` ya existia antes de estos campos, ejecutar una vez cada uno:
 
    ```sql
    -- supabase/upgrade_scraper_metadata.sql
+   -- supabase/upgrade_pais.sql
    ```
 
 3. Copiar `.env.example` a `.env.local` y completar:
@@ -75,14 +79,18 @@ muestra un fallback local minimo para que el directorio no quede vacio.
 El navegador no hace scraping. El flujo es:
 
 1. Vercel Cron llama `/api/scrape-centros` una vez al dia.
-2. La funcion lee fuentes publicas: el directorio de Red por Venezuela, mas una semilla
-   conservadora de puntos reportados por medios (El Tiempo, Vanguardia, La Opinion, El
-   Heraldo, TuBarco Noticias) en Bogota, Medellin, Bucaramanga, Cucuta, Barranquilla y
-   Cali. Agregar una ciudad nueva es agregar una funcion `get<Ciudad>SeedCentros()` en
-   `api/scrape-centros.ts` citando la fuente real.
-3. Normaliza ciudad, tipos de donacion, fuente, `external_id`, `ultima_revision` y
-   `ultima_vista`.
+2. La funcion lee fuentes publicas: el directorio en vivo de Red por Venezuela (centros
+   tanto en Colombia como en Venezuela), mas una semilla conservadora de puntos reportados
+   por medios (El Tiempo, Vanguardia, La Opinion, El Heraldo, TuBarco Noticias, El
+   Universal, La Patria) en Bogota, Medellin, Bucaramanga, Cucuta, Barranquilla, Cali,
+   Cartagena, Santa Marta y Manizales. Agregar una ciudad colombiana nueva es agregar una
+   funcion `get<Ciudad>SeedCentros()` en `api/scrape-centros.ts` citando la fuente real.
+3. Normaliza ciudad, pais (`Colombia`/`Venezuela`), tipos de donacion, fuente, `external_id`,
+   `ultima_revision` y `ultima_vista`.
 4. Hace `upsert` en Supabase con `SUPABASE_SERVICE_ROLE_KEY`.
+
+El directorio principal (`/`) solo muestra centros con `pais = 'Colombia'`; los de
+`pais = 'Venezuela'` aparecen en `/ayuda`, para quien necesita ayuda dentro de Venezuela.
 
 Para probar el scraper manualmente en Vercel:
 

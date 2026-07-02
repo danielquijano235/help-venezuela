@@ -6,6 +6,8 @@ create table if not exists public.centros (
   created_at       timestamptz not null default now(),
   nombre           text not null,
   organizacion     text,
+  pais             text not null default 'Colombia'
+                     check (pais in ('Colombia', 'Venezuela')),
   ciudad           text not null,
   direccion        text not null,
   estado           text not null default 'activo'

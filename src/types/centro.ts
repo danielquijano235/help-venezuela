@@ -12,11 +12,14 @@ export type TipoDonacion =
 
 export type ConfianzaDato = 'alta' | 'media' | 'baja';
 
+export type Pais = 'Colombia' | 'Venezuela';
+
 export interface Centro {
   id: string;
   created_at: string;
   nombre: string;
   organizacion: string | null;
+  pais: Pais;
   ciudad: string;
   direccion: string;
   estado: Estado;
@@ -36,11 +39,14 @@ export interface Centro {
 
 // Forma que envia el formulario publico. id/created_at/verificado y metadatos
 // de fuente los controla el servidor o el scraper, nunca el cliente publico.
+// `pais` tampoco: el formulario publico es exclusivamente para centros en
+// Colombia, así que se deja el default de la columna ('Colombia').
 export type NewCentro = Omit<
   Centro,
   | 'id'
   | 'created_at'
   | 'verificado'
+  | 'pais'
   | 'fuente_nombre'
   | 'fuente_url'
   | 'external_id'

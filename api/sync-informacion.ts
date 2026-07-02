@@ -239,5 +239,33 @@ function getServiciosAyuda(): ServicioAyuda[] {
         'https://www.elespectador.com/colombia/donde-donar-alimentos-ropa-y-medicamentos-para-los-damnificados-por-terremotos-en-venezuela-lineas-de-ayuda-y-atencion-psicosocial/',
       confianza: 'baja',
     },
+    {
+      nombre: 'Línea única nacional de emergencias (Venezuela)',
+      categoria: 'emergencia',
+      descripcion:
+        'Número de emergencia 911, disponible a nivel nacional en Venezuela desde cualquier teléfono móvil o fijo.',
+      direccion: null,
+      telefono: '911',
+      whatsapp: null,
+      email: null,
+      ciudad: null,
+      fuente_nombre: 'Gobernación Bolivariana de Miranda',
+      fuente_url: 'http://www.miranda.gob.ve/index.php/numeros-de-emergencia/',
+      confianza: 'alta',
+    },
+    {
+      nombre: 'Protección Civil Nacional (Venezuela)',
+      categoria: 'emergencia',
+      descripcion:
+        'Línea nacional de Protección Civil de Venezuela para reportar emergencias y coordinar asistencia.',
+      direccion: null,
+      telefono: '0800-7248451',
+      whatsapp: null,
+      email: null,
+      ciudad: null,
+      fuente_nombre: 'Gobernación Bolivariana de Miranda',
+      fuente_url: 'http://www.miranda.gob.ve/index.php/numeros-de-emergencia/',
+      confianza: 'alta',
+    },
   ];
 }

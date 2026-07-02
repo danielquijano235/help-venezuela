@@ -9,6 +9,7 @@ import {
 type ScrapedCentro = {
   nombre: string;
   organizacion: string | null;
+  pais: 'Colombia' | 'Venezuela';
   ciudad: string;
   direccion: string;
   estado: 'urgente' | 'activo' | 'cerrado';
@@ -58,6 +59,27 @@ const COLOMBIA_CITIES = [
   'Santa Marta',
   'Manizales',
   'Colombia',
+];
+
+const VENEZUELA_CITIES = [
+  'Caracas',
+  'Maracaibo',
+  'Valencia',
+  'Mérida',
+  'Merida',
+  'Barquisimeto',
+  'Maracay',
+  'Barcelona',
+  'Ciudad Guayana',
+  'San Cristóbal',
+  'San Cristobal',
+  'Barinas',
+  'Cumaná',
+  'Cumana',
+  'Puerto La Cruz',
+  'La Guaira',
+  'Vargas',
+  'Venezuela',
 ];
 
 export default async function handler(req: HandlerRequest, res: HandlerResponse) {
@@ -144,6 +166,7 @@ export default async function handler(req: HandlerRequest, res: HandlerResponse)
 function getOfficialSeedCentros(nowIso: string): ScrapedCentro[] {
   const base = {
     organizacion: 'Bomberos Oficiales de Bogotá / IDPYBA',
+    pais: 'Colombia',
     ciudad: 'Bogotá',
     estado: 'activo',
     tipos_donacion: ['mascotas', 'comida', 'medicina', 'otros'],
@@ -193,6 +216,7 @@ function getMedellinSeedCentros(nowIso: string): ScrapedCentro[] {
     {
       nombre: 'Institución Educativa Héctor Abad Gómez - Sede Placita de Flores',
       organizacion: null,
+      pais: 'Colombia',
       ciudad: 'Medellín',
       direccion: 'Calle 50 #39-65',
       estado: 'activo',
@@ -215,6 +239,7 @@ function getMedellinSeedCentros(nowIso: string): ScrapedCentro[] {
 
 function getBucaramangaSeedCentros(nowIso: string): ScrapedCentro[] {
   const base = {
+    pais: 'Colombia',
     ciudad: 'Bucaramanga',
     estado: 'activo',
     telefono: null,
@@ -265,6 +290,7 @@ function getBucaramangaSeedCentros(nowIso: string): ScrapedCentro[] {
 
 function getCucutaSeedCentros(nowIso: string): ScrapedCentro[] {
   const base = {
+    pais: 'Colombia',
     ciudad: 'Cúcuta',
     estado: 'activo',
     telefono: null,
@@ -314,6 +340,7 @@ function getCucutaSeedCentros(nowIso: string): ScrapedCentro[] {
 
 function getBarranquillaSeedCentros(nowIso: string): ScrapedCentro[] {
   const base = {
+    pais: 'Colombia',
     ciudad: 'Barranquilla',
     estado: 'activo',
     telefono: null,
@@ -355,6 +382,7 @@ function getBarranquillaSeedCentros(nowIso: string): ScrapedCentro[] {
 
 function getCaliSeedCentros(nowIso: string): ScrapedCentro[] {
   const base = {
+    pais: 'Colombia',
     ciudad: 'Cali',
     estado: 'activo',
     telefono: null,
@@ -404,6 +432,7 @@ function getCaliSeedCentros(nowIso: string): ScrapedCentro[] {
 
 function getCartagenaSeedCentros(nowIso: string): ScrapedCentro[] {
   const base = {
+    pais: 'Colombia',
     ciudad: 'Cartagena',
     estado: 'activo',
     telefono: null,
@@ -447,6 +476,7 @@ function getCartagenaSeedCentros(nowIso: string): ScrapedCentro[] {
 function getSantaMartaSeedCentros(nowIso: string): ScrapedCentro[] {
   return [
     {
+      pais: 'Colombia',
       ciudad: 'Santa Marta',
       estado: 'activo',
       telefono: null,
@@ -472,6 +502,7 @@ function getSantaMartaSeedCentros(nowIso: string): ScrapedCentro[] {
 function getManizalesSeedCentros(nowIso: string): ScrapedCentro[] {
   return [
     {
+      pais: 'Colombia',
       ciudad: 'Manizales',
       estado: 'activo',
       telefono: null,
@@ -507,18 +538,26 @@ function parseRedPorVenezuela(html: string, nowIso: string): ScrapedCentro[] {
     if (!name) continue;
 
     const blockText = block.join(' ');
-    if (!COLOMBIA_CITIES.some((city) => includesInsensitive(blockText, city))) continue;
+    const isColombia = COLOMBIA_CITIES.some((city) => includesInsensitive(blockText, city));
+    const isVenezuela = VENEZUELA_CITIES.some((city) => includesInsensitive(blockText, city));
+    if (!isColombia && !isVenezuela) continue;
+    // Si el texto menciona ambos paises (p. ej. una referencia de contexto a
+    // "Venezuela" dentro de un bloque que en realidad es de Colombia),
+    // Colombia gana porque las listas de ciudades colombianas son mas
+    // especificas que el comodin generico 'Venezuela'.
+    const pais: 'Colombia' | 'Venezuela' = isColombia ? 'Colombia' : 'Venezuela';
 
     const mapsUrl = block.find((line) => line.includes('google.com/maps')) ?? null;
     const detailUrl = block.find((line) => line.includes('/centro/')) ?? null;
     const direccion = extractMapsQuery(mapsUrl) ?? inferAddress(blockText) ?? 'Dirección por confirmar';
-    const ciudad = inferCity(blockText) ?? 'Bogotá';
+    const ciudad = inferCity(blockText) ?? (pais === 'Venezuela' ? 'Caracas' : 'Bogotá');
     const tipos = parseDonationTypes(blockText);
     const sourceUrl = detailUrl ? absoluteRedUrl(detailUrl) : RED_POR_VENEZUELA_URL;
 
     entries.push({
       nombre: name,
       organizacion: null,
+      pais,
       ciudad,
       direccion,
       estado: status,
@@ -634,7 +673,22 @@ function inferCity(value: string) {
   if (includesInsensitive(value, 'Barranquilla')) return 'Barranquilla';
   if (includesInsensitive(value, 'Bucaramanga')) return 'Bucaramanga';
   if (includesInsensitive(value, 'Valledupar')) return 'Valledupar';
+  if (includesInsensitive(value, 'Cartagena')) return 'Cartagena';
+  if (includesInsensitive(value, 'Santa Marta')) return 'Santa Marta';
+  if (includesInsensitive(value, 'Manizales')) return 'Manizales';
   if (includesInsensitive(value, 'Cali')) return 'Cali';
+  if (includesInsensitive(value, 'Caracas')) return 'Caracas';
+  if (includesInsensitive(value, 'Maracaibo')) return 'Maracaibo';
+  if (includesInsensitive(value, 'Valencia')) return 'Valencia';
+  if (includesInsensitive(value, 'Mérida') || includesInsensitive(value, 'Merida')) return 'Mérida';
+  if (includesInsensitive(value, 'Barquisimeto')) return 'Barquisimeto';
+  if (includesInsensitive(value, 'Maracay')) return 'Maracay';
+  if (includesInsensitive(value, 'Ciudad Guayana')) return 'Ciudad Guayana';
+  if (includesInsensitive(value, 'San Cristóbal') || includesInsensitive(value, 'San Cristobal')) return 'San Cristóbal';
+  if (includesInsensitive(value, 'Barinas')) return 'Barinas';
+  if (includesInsensitive(value, 'Cumaná') || includesInsensitive(value, 'Cumana')) return 'Cumaná';
+  if (includesInsensitive(value, 'Puerto La Cruz')) return 'Puerto La Cruz';
+  if (includesInsensitive(value, 'La Guaira') || includesInsensitive(value, 'Vargas')) return 'La Guaira';
   return null;
 }
 

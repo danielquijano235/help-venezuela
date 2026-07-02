@@ -1,5 +1,5 @@
-export function buildGoogleMapsUrl(direccion: string, ciudad: string): string {
-  const query = `${direccion}, ${ciudad}, Colombia`;
+export function buildGoogleMapsUrl(direccion: string, ciudad: string, pais: string = 'Colombia'): string {
+  const query = `${direccion}, ${ciudad}, ${pais}`;
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
 }
 

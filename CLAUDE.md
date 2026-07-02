@@ -45,6 +45,13 @@ vigencia warning. This is a product decision for emergency-response info.
 `Estado` and `TipoDonacion` as UI-facing arrays (labels/icons for filters and the add-center
 form) — `confianza` has no such array since it isn't rendered in the UI yet.
 
+`centros` also has a `pais` column (`'Colombia' | 'Venezuela'`, default `'Colombia'`) — the
+main directory (`/`, `useCentros.ts`) filters to `pais = 'Colombia'` (its whole purpose is
+"where to donate from Colombia"), while `/ayuda` (`useCentrosVenezuela.ts`) filters to
+`pais = 'Venezuela'` ("where to get help inside Venezuela"). `NewCentro` omits `pais`
+entirely — the public `/agregar` form is Colombia-only, so the column default handles it.
+If an existing DB predates this column, run `supabase/upgrade_pais.sql` once.
+
 `schema.sql` also defines `public.noticias` and `public.servicios_ayuda` — editorial content
 (news and emergency/help contacts) curated by hand, kept in sync by `api/sync-informacion.ts`
 (see Data flow below). Unlike `centros`, neither table has an `insert` RLS policy at all
@@ -78,14 +85,23 @@ checks `Authorization: Bearer <secret>` against `SCRAPER_CRON_SECRET` (falling b
 
 Two kinds of sources feed `centros`: a live HTML scrape of `redporvenezuela.com/centros`
 (`parseRedPorVenezuela`, regex-based — brittle if that site's markup changes), and a set of
-hand-curated `get<Ciudad>SeedCentros()` functions (one per city: Bogotá, Medellín,
-Bucaramanga, Cúcuta, Barranquilla, Cali), each citing one real news-article URL as
-`fuente_url`. These seeds exist because most city-level donation points are reported once
-in a news article (prose, no stable structure to scrape repeatedly) rather than published
-on a live directory — so the "scrape" for those cities is a one-time manual read of the
-article into a typed literal, re-upserted (with a fresh `ultima_vista`) every cron run. To
-add another city, add a new `get<Ciudad>SeedCentros()` function following the same shape
-and append it to the `centros` array in the handler.
+hand-curated `get<Ciudad>SeedCentros()` functions (one per Colombian city: Bogotá, Medellín,
+Bucaramanga, Cúcuta, Barranquilla, Cali, Cartagena, Santa Marta, Manizales), each citing one
+real news-article URL as `fuente_url` and hardcoding `pais: 'Colombia'`. These seeds exist
+because most city-level donation points are reported once in a news article (prose, no
+stable structure to scrape repeatedly) rather than published on a live directory — so the
+"scrape" for those cities is a one-time manual read of the article into a typed literal,
+re-upserted (with a fresh `ultima_vista`) every cron run. To add another Colombian city,
+add a new `get<Ciudad>SeedCentros()` function following the same shape and append it to the
+`centros` array in the handler.
+
+`redporvenezuela.com/centros` itself *is* a live structured directory (unlike the prose
+articles behind the city seeds), and it lists centers both in Colombia and inside Venezuela
+— so unlike the seeds, `parseRedPorVenezuela` doesn't need hand-curation to grow: it checks
+each parsed block's text against both `COLOMBIA_CITIES` and `VENEZUELA_CITIES`, sets
+`pais` accordingly, and skips the block if neither matches (this is also where the
+site's other ~30-40% of listings — Panama, Spain, the US, etc. — get filtered out, since
+those countries are out of scope by design).
 
 `src/lib/maps.ts` builds a Google Maps search URL from plain address text. There is no
 geocoding API integration.
@@ -106,11 +122,12 @@ editor again after the initial seed.
 
 ### Routing
 
-Four SPA routes are wired in `src/App.tsx`: `/` (`ListingPage`), `/agregar`
-(`AddCenterPage`), `/ayuda` (`AyudaPage` — emergency/help services from
-`servicios_ayuda`), `/noticias` (`NoticiasPage` — news from `noticias`), plus a catch-all
-`*` route rendering `NotFoundPage`. `vercel.json` and `public/_redirects` rewrite SPA
-routes to `index.html`; Vercel API routes still live under `/api/*`.
+Four SPA routes are wired in `src/App.tsx`: `/` (`ListingPage`, Colombia-only `centros`),
+`/agregar` (`AddCenterPage`), `/ayuda` (`AyudaPage` — Venezuela `centros` plus
+`servicios_ayuda` emergency/help contacts), `/noticias` (`NoticiasPage` — news from
+`noticias`), plus a catch-all `*` route rendering `NotFoundPage`. `vercel.json` and
+`public/_redirects` rewrite SPA routes to `index.html`; Vercel API routes still live under
+`/api/*`.
 
 The 4 homepage "puertas" in `src/components/ActionCards.tsx` each resolve to one real
 destination now: Puerta 01 ("Necesito ayuda") → `/ayuda` (plus a link straight to
