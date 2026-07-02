@@ -1,15 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
-
-type HandlerRequest = {
-  method?: string;
-  headers: Record<string, string | string[] | undefined>;
-};
-
-type HandlerResponse = {
-  status: (statusCode: number) => HandlerResponse;
-  json: (body: unknown) => void;
-  setHeader: (name: string, value: string) => void;
-};
+import {
+  getSupabaseAdminConfig,
+  isAuthorizedCronRequest,
+  type HandlerRequest,
+  type HandlerResponse,
+} from '../server/cronAuth.js';
 
 type ScrapedCentro = {
   nombre: string;
@@ -65,21 +60,19 @@ export default async function handler(req: HandlerRequest, res: HandlerResponse)
     return;
   }
 
-  const cronSecret = process.env.SCRAPER_CRON_SECRET ?? process.env.CRON_SECRET;
-  if (cronSecret && getBearerToken(req.headers.authorization) !== cronSecret) {
+  if (!isAuthorizedCronRequest(req)) {
     res.status(401).json({ error: 'Unauthorized' });
     return;
   }
 
-  const supabaseUrl = process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (!supabaseUrl || !serviceRoleKey) {
+  const supabaseAdminConfig = getSupabaseAdminConfig();
+  if (!supabaseAdminConfig) {
     res.status(500).json({
       error: 'Missing SUPABASE_URL/VITE_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY',
     });
     return;
   }
+  const { supabaseUrl, serviceRoleKey } = supabaseAdminConfig;
 
   const nowIso = new Date().toISOString();
   const centros = [
@@ -600,10 +593,4 @@ function dedupeBySourceId(centros: ScrapedCentro[]) {
     seen.add(key);
     return true;
   });
-}
-
-function getBearerToken(value: string | string[] | undefined) {
-  const authorization = Array.isArray(value) ? value[0] : value;
-  const match = authorization?.match(/^Bearer\s+(.+)$/i);
-  return match?.[1] ?? null;
 }

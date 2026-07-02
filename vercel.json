@@ -3,6 +3,10 @@
     {
       "path": "/api/scrape-centros",
       "schedule": "0 10 * * *"
+    },
+    {
+      "path": "/api/sync-informacion",
+      "schedule": "0 14 * * *"
     }
   ],
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]

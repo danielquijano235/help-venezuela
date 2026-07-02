@@ -16,9 +16,11 @@ No test suite exists yet. There is no `npm test` script.
 ## Architecture
 
 HelpVenezuela is primarily a static React + TypeScript SPA. The public app reads and
-submits data directly through Supabase, and there is one server-side Vercel Function:
-`api/scrape-centros.ts`. That function is for scheduled data ingestion only; do not add an
-Express/Flask/API layer.
+submits data directly through Supabase, and there are two server-side Vercel Functions —
+`api/scrape-centros.ts` and `api/sync-informacion.ts` — both for scheduled data ingestion
+only; do not add an Express/Flask/API layer. They share auth/config helpers from
+`server/cronAuth.ts`, which deliberately lives **outside** `api/`: Vercel deploys every file
+under `api/` as its own function, so a shared module has to sit in a sibling folder instead.
 
 ### Data model and security
 
@@ -44,12 +46,18 @@ vigencia warning. This is a product decision for emergency-response info.
 form) — `confianza` has no such array since it isn't rendered in the UI yet.
 
 `schema.sql` also defines `public.noticias` and `public.servicios_ayuda` — editorial content
-(news and emergency/help contacts) curated by hand via the SQL editor, loaded once with
-`supabase/seed_noticias.sql` / `supabase/seed_servicios_ayuda.sql`. Unlike `centros`, neither
-table has an `insert` RLS policy at all (public clients can only `select`), since there's no
-public submission form feeding them — everything in these two tables is team-curated, so
-there's no `verificado` column either. `src/types/noticia.ts` and
-`src/types/servicioAyuda.ts` mirror their check-constraint values (`confianza`, `categoria`).
+(news and emergency/help contacts) curated by hand, kept in sync by `api/sync-informacion.ts`
+(see Data flow below). Unlike `centros`, neither table has an `insert` RLS policy at all
+(public clients can only `select`), since there's no public submission form feeding them —
+everything in these two tables is team-curated, so there's no `verificado` column either.
+`src/types/noticia.ts` and `src/types/servicioAyuda.ts` mirror their check-constraint values
+(`confianza`, `categoria`). Both tables have a unique index (`fuente_nombre` + `titulo`/
+`nombre`) that exists solely so the cron's `upsert` doesn't create duplicate rows — there's
+no scraper-style external ID for this content.
+
+`supabase/seed_noticias.sql` / `supabase/seed_servicios_ayuda.sql` were the one-time initial
+load (run manually, same convention as `seed.sql`); `api/sync-informacion.ts` is what keeps
+them current going forward — see Data flow.
 
 ### Data flow
 
@@ -86,6 +94,15 @@ geocoding API integration.
 shape exactly (fetch on mount, loading/error state, local fallback) — deliberately not
 abstracted into a shared generic hook, consistent with the rest of the codebase not
 abstracting this pattern either.
+
+`api/sync-informacion.ts` is called by Vercel Cron once a day (`vercel.json`, offset from
+the centros cron). Unlike `scrape-centros.ts`, there's no live source to scrape — news and
+help-service contacts are reported once in prose news articles, not a structured directory
+— so this function's `getNoticias()`/`getServiciosAyuda()` are hand-maintained arrays (same
+idea as `get<Ciudad>SeedCentros()`), each item citing a real source. "Adding more" means
+editing those two arrays and pushing; the daily cron re-upserts them (`onConflict:
+fuente_nombre,titulo` / `fuente_nombre,nombre`) so nobody needs to touch the Supabase SQL
+editor again after the initial seed.
 
 ### Routing
 

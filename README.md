@@ -23,6 +23,8 @@ muestra un fallback local minimo para que el directorio no quede vacio.
   etc.), con link directo a los centros urgentes del directorio.
 - `/noticias`: noticias reales sobre los terremotos y la respuesta humanitaria, con fuente
   citada en cada nota.
+- Noticias y servicios de ayuda tambien se mantienen al dia solos: `/api/sync-informacion`
+  corre 1 vez al dia (Vercel Cron) y vuelve a subir el contenido curado.
 
 ## Requisitos
 
@@ -91,6 +93,24 @@ curl -H "Authorization: Bearer $CRON_SECRET" https://tu-dominio.vercel.app/api/s
 Los datos importados automaticamente quedan `verificado = false`; la verificacion sigue
 siendo manual desde Supabase.
 
+### Noticias y servicios de ayuda
+
+A diferencia de los centros, no hay un directorio en vivo para scrapear (son notas de
+prensa sueltas, no una fuente estructurada). `/api/sync-informacion` corre 1 vez al dia
+(desfasado del cron de centros) y hace `upsert` de dos arrays mantenidos a mano en el
+propio archivo (`getNoticias()` / `getServiciosAyuda()`), cada item citando una fuente real.
+
+Para agregar mas contenido: edita esos arrays en `api/sync-informacion.ts` con datos reales
+y su fuente, y haz push — el cron del dia siguiente los sube solo, sin tocar el SQL Editor
+de Supabase otra vez. El `upsert` usa `(fuente_nombre, titulo)` para noticias y
+`(fuente_nombre, nombre)` para servicios de ayuda, asi que no crea filas duplicadas.
+
+Para probarlo manualmente:
+
+```bash
+curl -H "Authorization: Bearer $CRON_SECRET" https://tu-dominio.vercel.app/api/sync-informacion
+```
+
 ## Seguridad de datos (RLS)
 
 La `anon key` de Supabase se incluye en el bundle del frontend por diseno. Toda la seguridad
@@ -111,7 +131,7 @@ formulario publico que las alimente.
 
 - **Vercel**: configura `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`,
   `SUPABASE_SERVICE_ROLE_KEY` y `CRON_SECRET`. `vercel.json` incluye el rewrite del SPA y
-  el cron de `/api/scrape-centros`.
+  los crons de `/api/scrape-centros` y `/api/sync-informacion`.
 - **Netlify**: sirve el SPA con `public/_redirects`, pero el cron/serverless scraper tendria
   que migrarse a Netlify Functions o a otro scheduler.
 

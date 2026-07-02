@@ -90,6 +90,11 @@ create policy "noticias_public_select"
 -- Sin policy de insert/update/delete: RLS deniega esas operaciones para
 -- anon/authenticated. El contenido se administra desde el Table Editor.
 
+-- Requerido para que `api/sync-informacion.ts` pueda hacer upsert
+-- (onConflict: fuente_nombre,titulo) sin crear filas duplicadas cada dia.
+create unique index if not exists noticias_fuente_titulo_uidx
+  on public.noticias (fuente_nombre, titulo);
+
 -- Servicios de ayuda ---------------------------------------------------------
 -- Igual que noticias: contactos/servicios de emergencia curados a mano
 -- (ver seed_servicios_ayuda.sql), sin insert publico.
@@ -125,3 +130,8 @@ create policy "servicios_ayuda_public_select"
   on public.servicios_ayuda for select
   to anon, authenticated
   using (true);
+
+-- Requerido para que `api/sync-informacion.ts` pueda hacer upsert
+-- (onConflict: fuente_nombre,nombre) sin crear filas duplicadas cada dia.
+create unique index if not exists servicios_ayuda_fuente_nombre_uidx
+  on public.servicios_ayuda (fuente_nombre, nombre);
