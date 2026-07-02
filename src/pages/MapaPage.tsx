@@ -7,11 +7,11 @@ import { useMapPoints } from '../hooks/useMapPoints';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { BackLink } from '../components/BackLink';
 import { StatusBadge } from '../components/StatusBadge';
-import { DonationTypeTag } from '../components/DonationTypeTag';
 import { buildGoogleMapsUrl, buildWhatsappUrl } from '../lib/maps';
 import { ESTADOS, CATEGORIAS_SERVICIO } from '../data/constants';
-import type { Estado } from '../types/centro';
+import type { Centro, Estado } from '../types/centro';
 import type { CategoriaServicio } from '../types/servicioAyuda';
+import type { MapPoint } from '../types/mapPoint';
 
 const VENEZUELA_CENTER: [number, number] = [7.8, -66.1];
 const VENEZUELA_ZOOM = 6;
@@ -22,6 +22,10 @@ const ESTADO_COLORS: Record<Estado, string> = {
   cerrado: '#8a847c',
 };
 
+// Prioridad para el color del pin de ciudad: si hay algún centro urgente el pin
+// se pinta de urgente; si no, activo; si no, cerrado.
+const ESTADO_PRIORITY: Estado[] = ['urgente', 'activo', 'cerrado'];
+
 const CATEGORIA_COLORS: Record<CategoriaServicio, string> = {
   emergencia: '#d9480f',
   medico: '#1e4c8a',
@@ -30,6 +34,25 @@ const CATEGORIA_COLORS: Record<CategoriaServicio, string> = {
   refugio: '#163a6b',
   otros: '#6b6560',
 };
+
+function cityColor(centros: Centro[]): string {
+  const estado = ESTADO_PRIORITY.find((e) => centros.some((c) => c.estado === e));
+  return ESTADO_COLORS[estado ?? 'activo'];
+}
+
+// Solo mostramos la dirección / "Cómo llegar" cuando el texto parece una
+// dirección real; muchos centros traen "Dirección por confirmar" o prosa suelta.
+function hasRealAddress(direccion: string): boolean {
+  const d = direccion
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+  if (d.length < 8 || d.length > 140) return false;
+  return !['por confirmar', 'se han habilitado', 'ciudadanos', 'voluntarios', 'enlace de la bio'].some(
+    (bad) => d.includes(bad),
+  );
+}
 
 function pointIcon(color: string, shape: 'circle' | 'diamond') {
   const transform = shape === 'diamond' ? 'rotate(45deg)' : 'none';
@@ -74,11 +97,17 @@ export function MapaPage() {
     });
   }
 
+  // Cada pin de ciudad se recorta a los centros que pasan el filtro de estado;
+  // si ninguno pasa, la ciudad se oculta por completo.
   const visiblePoints = useMemo(
     () =>
-      points.filter((point) => {
-        if (point.kind === 'centro') return showCentros && visibleEstados.has(point.data.estado);
-        return showServicios && visibleCategorias.has(point.data.categoria);
+      points.flatMap((point): MapPoint[] => {
+        if (point.kind === 'ciudad') {
+          if (!showCentros) return [];
+          const centros = point.centros.filter((c) => visibleEstados.has(c.estado));
+          return centros.length > 0 ? [{ ...point, centros }] : [];
+        }
+        return showServicios && visibleCategorias.has(point.data.categoria) ? [point] : [];
       }),
     [points, showCentros, showServicios, visibleEstados, visibleCategorias],
   );
@@ -93,8 +122,9 @@ export function MapaPage() {
         Mapa de puntos en Venezuela
       </h1>
       <p className="mt-2 text-ink/70">
-        Centros de acopio y servicios de ayuda ubicados sobre un mapa. Cuando no hay una
-        dirección exacta, el punto se ubica a nivel de ciudad.
+        Los centros de acopio se agrupan por ciudad (la mayoría se reporta sin dirección
+        exacta): cada punto reúne los centros de esa ciudad. Los servicios de ayuda sí se
+        ubican individualmente.
       </p>
 
       {!loading && usingFallback && (
@@ -190,49 +220,68 @@ export function MapaPage() {
               />
 
               {visiblePoints.map((point) =>
-                point.kind === 'centro' ? (
+                point.kind === 'ciudad' ? (
                   <Marker
-                    key={`centro-${point.id}`}
+                    key={point.id}
                     position={[point.lat, point.lng]}
-                    icon={pointIcon(ESTADO_COLORS[point.data.estado], 'circle')}
+                    icon={pointIcon(cityColor(point.centros), 'circle')}
                   >
                     <Popup>
-                      <div className="flex max-w-[16rem] flex-col gap-1.5">
-                        <p className="font-semibold text-ink">{point.data.nombre}</p>
-                        <StatusBadge estado={point.data.estado} verificado={point.data.verificado} />
-                        <p className="flex items-start gap-1 text-xs text-ink/70">
-                          <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                          {point.data.direccion}, {point.data.ciudad}
-                        </p>
-                        {point.data.tipos_donacion.length > 0 && (
-                          <div className="flex flex-wrap gap-1">
-                            {point.data.tipos_donacion.map((tipo) => (
-                              <DonationTypeTag key={tipo} tipo={tipo} />
-                            ))}
-                          </div>
-                        )}
-                        <div className="mt-1 flex flex-wrap gap-2 border-t border-ink/10 pt-1.5 text-xs">
-                          <a
-                            href={buildGoogleMapsUrl(point.data.direccion, point.data.ciudad, point.data.pais)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1 font-medium text-signal hover:text-signal-dark"
-                          >
-                            <MapPin className="h-3.5 w-3.5" />
-                            Cómo llegar
-                          </a>
-                          {point.data.whatsapp && (
-                            <a
-                              href={buildWhatsappUrl(point.data.whatsapp)}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-1 text-ink/60 hover:text-ink"
-                            >
-                              <MessageCircle className="h-3.5 w-3.5" />
-                              WhatsApp
-                            </a>
-                          )}
+                      <div className="flex max-w-[18rem] flex-col gap-2">
+                        <div>
+                          <p className="font-semibold text-ink">{point.ciudad}</p>
+                          <p className="text-xs text-ink/60">
+                            {point.centros.length}{' '}
+                            {point.centros.length === 1 ? 'centro de acopio' : 'centros de acopio'}
+                          </p>
                         </div>
+                        <ul className="flex max-h-72 flex-col gap-2 overflow-y-auto pr-1">
+                          {point.centros.map((centro) => (
+                            <li
+                              key={centro.id}
+                              className="border-t border-ink/10 pt-2 first:border-t-0 first:pt-0"
+                            >
+                              <p className="text-sm font-medium text-ink">{centro.nombre}</p>
+                              <div className="mt-0.5">
+                                <StatusBadge estado={centro.estado} verificado={centro.verificado} />
+                              </div>
+                              {hasRealAddress(centro.direccion) && (
+                                <p className="mt-1 flex items-start gap-1 text-xs text-ink/70">
+                                  <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                                  {centro.direccion}
+                                </p>
+                              )}
+                              <div className="mt-1 flex flex-wrap gap-2 text-xs">
+                                {hasRealAddress(centro.direccion) && (
+                                  <a
+                                    href={buildGoogleMapsUrl(
+                                      centro.direccion,
+                                      centro.ciudad,
+                                      centro.pais,
+                                    )}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-1 font-medium text-signal hover:text-signal-dark"
+                                  >
+                                    <MapPin className="h-3.5 w-3.5" />
+                                    Cómo llegar
+                                  </a>
+                                )}
+                                {centro.whatsapp && (
+                                  <a
+                                    href={buildWhatsappUrl(centro.whatsapp)}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-1 text-ink/60 hover:text-ink"
+                                  >
+                                    <MessageCircle className="h-3.5 w-3.5" />
+                                    WhatsApp
+                                  </a>
+                                )}
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
                       </div>
                     </Popup>
                   </Marker>
@@ -302,9 +351,9 @@ export function MapaPage() {
             </div>
           </div>
 
-          {points.length === 0 && (
+          {visiblePoints.length === 0 && (
             <p className="mt-4 text-center text-sm text-ink/50">
-              Todavía no hay puntos con dirección para mostrar en el mapa.
+              No hay puntos que mostrar con los filtros actuales.
             </p>
           )}
         </>
