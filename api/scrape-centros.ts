@@ -1,10 +1,11 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import {
   getSupabaseAdminConfig,
   isAuthorizedCronRequest,
   type HandlerRequest,
   type HandlerResponse,
 } from '../server/cronAuth.js';
+import { geocodeAddress } from '../server/geocode.js';
 
 type ScrapedCentro = {
   nombre: string;
@@ -26,6 +27,8 @@ type ScrapedCentro = {
   ultima_vista: string;
   confianza: 'alta' | 'media' | 'baja';
 };
+
+type GeocodedCentro = ScrapedCentro & { lat: number | null; lng: number | null };
 
 const RED_POR_VENEZUELA_URL = 'https://redporvenezuela.com/centros';
 const TROPICANA_SOURCE_URL =
@@ -139,25 +142,28 @@ export default async function handler(req: HandlerRequest, res: HandlerResponse)
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
+  const geocodedCentros = await attachCoordinates(supabase, uniqueCentros);
+
   const { error } = await supabase
     .from('centros')
-    .upsert(uniqueCentros, { onConflict: 'fuente_nombre,external_id' });
+    .upsert(geocodedCentros, { onConflict: 'fuente_nombre,external_id' });
 
   if (error) {
     res.status(500).json({ error: error.message, scrapeErrors });
     return;
   }
 
-  const porCiudad = uniqueCentros.reduce<Record<string, number>>((acc, centro) => {
+  const porCiudad = geocodedCentros.reduce<Record<string, number>>((acc, centro) => {
     acc[centro.ciudad] = (acc[centro.ciudad] ?? 0) + 1;
     return acc;
   }, {});
 
   res.status(200).json({
     ok: true,
-    upserted: uniqueCentros.length,
+    upserted: geocodedCentros.length,
+    geocodados: geocodedCentros.filter((centro) => centro.lat !== null).length,
     porCiudad,
-    redPorVenezuela: uniqueCentros.filter((centro) => centro.fuente_nombre === 'Red por Venezuela')
+    redPorVenezuela: geocodedCentros.filter((centro) => centro.fuente_nombre === 'Red por Venezuela')
       .length,
     scrapeErrors,
   });
@@ -749,4 +755,38 @@ function dedupeBySourceId(centros: ScrapedCentro[]) {
     seen.add(key);
     return true;
   });
+}
+
+// Geocodifica una sola vez por centro: si ya tiene lat/lng guardado de una
+// corrida anterior, lo reutiliza (evita volver a golpear Nominatim todos los
+// dias para las mismas ~80 direcciones). Solo las filas nuevas o que nunca
+// se pudieron ubicar antes hacen una llamada real.
+async function attachCoordinates(
+  supabase: SupabaseClient,
+  centros: ScrapedCentro[]
+): Promise<GeocodedCentro[]> {
+  const { data: existing } = await supabase
+    .from('centros')
+    .select('fuente_nombre, external_id, lat, lng');
+
+  const existingCoords = new Map<string, { lat: number | null; lng: number | null }>();
+  for (const row of existing ?? []) {
+    existingCoords.set(`${row.fuente_nombre}:${row.external_id}`, { lat: row.lat, lng: row.lng });
+  }
+
+  const result: GeocodedCentro[] = [];
+  for (const centro of centros) {
+    const key = `${centro.fuente_nombre}:${centro.external_id}`;
+    const previo = existingCoords.get(key);
+
+    if (previo?.lat != null && previo?.lng != null) {
+      result.push({ ...centro, lat: previo.lat, lng: previo.lng });
+      continue;
+    }
+
+    const coords = await geocodeAddress(centro.direccion, centro.ciudad, centro.pais);
+    result.push({ ...centro, lat: coords?.lat ?? null, lng: coords?.lng ?? null });
+  }
+
+  return result;
 }

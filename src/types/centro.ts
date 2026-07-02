@@ -35,6 +35,8 @@ export interface Centro {
   ultima_revision: string | null;
   ultima_vista: string | null;
   confianza: ConfianzaDato;
+  lat: number | null;
+  lng: number | null;
 }
 
 // Forma que envia el formulario publico. id/created_at/verificado y metadatos
@@ -53,4 +55,6 @@ export type NewCentro = Omit<
   | 'ultima_revision'
   | 'ultima_vista'
   | 'confianza'
+  | 'lat'
+  | 'lng'
 >;

@@ -1,10 +1,11 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import {
   getSupabaseAdminConfig,
   isAuthorizedCronRequest,
   type HandlerRequest,
   type HandlerResponse,
 } from '../server/cronAuth.js';
+import { geocodeAddress } from '../server/geocode.js';
 
 type Noticia = {
   titulo: string;
@@ -32,6 +33,8 @@ type ServicioAyuda = {
   fuente_url: string;
   confianza: 'alta' | 'media' | 'baja';
 };
+
+type GeocodedServicioAyuda = ServicioAyuda & { lat: number | null; lng: number | null };
 
 export default async function handler(req: HandlerRequest, res: HandlerResponse) {
   if (req.method && !['GET', 'POST'].includes(req.method)) {
@@ -79,7 +82,7 @@ export default async function handler(req: HandlerRequest, res: HandlerResponse)
   }
 
   const noticias = dedupeNoticias([...getNoticias(), ...scrapedNoticias]);
-  const servicios = getServiciosAyuda();
+  const servicios = await attachServicioCoordinates(supabase, getServiciosAyuda());
 
   const { error: noticiasError } = await supabase
     .from('noticias')
@@ -104,6 +107,7 @@ export default async function handler(req: HandlerRequest, res: HandlerResponse)
     noticias: noticias.length,
     noticiasScrapeadas: scrapedNoticias.length,
     servicios: servicios.length,
+    serviciosGeocodados: servicios.filter((s) => s.lat !== null).length,
     scrapeErrors,
   });
 }
@@ -298,6 +302,46 @@ function getServiciosAyuda(): ServicioAyuda[] {
       confianza: 'alta',
     },
   ];
+}
+
+// Igual que attachCoordinates en scrape-centros.ts: reutiliza lat/lng ya
+// guardado para no volver a golpear Nominatim cada dia por lo mismo.
+// Muchos servicios son lineas telefonicas sin direccion fisica (direccion
+// null) — esos se quedan sin coordenadas a proposito, nunca deberian
+// aparecer en el mapa.
+async function attachServicioCoordinates(
+  supabase: SupabaseClient,
+  servicios: ServicioAyuda[]
+): Promise<GeocodedServicioAyuda[]> {
+  const { data: existing } = await supabase
+    .from('servicios_ayuda')
+    .select('fuente_nombre, nombre, lat, lng');
+
+  const existingCoords = new Map<string, { lat: number | null; lng: number | null }>();
+  for (const row of existing ?? []) {
+    existingCoords.set(`${row.fuente_nombre}:${row.nombre}`, { lat: row.lat, lng: row.lng });
+  }
+
+  const result: GeocodedServicioAyuda[] = [];
+  for (const servicio of servicios) {
+    if (!servicio.direccion) {
+      result.push({ ...servicio, lat: null, lng: null });
+      continue;
+    }
+
+    const key = `${servicio.fuente_nombre}:${servicio.nombre}`;
+    const previo = existingCoords.get(key);
+
+    if (previo?.lat != null && previo?.lng != null) {
+      result.push({ ...servicio, lat: previo.lat, lng: previo.lng });
+      continue;
+    }
+
+    const coords = await geocodeAddress(servicio.direccion, servicio.ciudad ?? '', 'Venezuela');
+    result.push({ ...servicio, lat: coords?.lat ?? null, lng: coords?.lng ?? null });
+  }
+
+  return result;
 }
 
 // redporvenezuela.com/oficial es un directorio de noticias con markup

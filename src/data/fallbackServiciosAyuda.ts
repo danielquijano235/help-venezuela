@@ -17,6 +17,8 @@ export const FALLBACK_SERVICIOS_AYUDA: ServicioAyuda[] = [
     fuente_url:
       'https://www.semana.com/nacion/articulo/no-logra-contactar-a-un-familiar-en-venezuela-cruz-roja-colombiana-activo-linea-de-ayuda/202621/',
     confianza: 'alta',
+    lat: null,
+    lng: null,
   },
   {
     id: 'fallback-servicio-linea-psicologica-venezuela',
@@ -33,5 +35,7 @@ export const FALLBACK_SERVICIOS_AYUDA: ServicioAyuda[] = [
     fuente_nombre: 'teleSUR',
     fuente_url: 'https://www.telesurtv.net/venezuela-habilita-linea-atencion-psicologica/',
     confianza: 'media',
+    lat: null,
+    lng: null,
   },
 ];

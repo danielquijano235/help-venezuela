@@ -22,4 +22,6 @@ export interface ServicioAyuda {
   fuente_nombre: string;
   fuente_url: string;
   confianza: ConfianzaDato;
+  lat: number | null;
+  lng: number | null;
 }

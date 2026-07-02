@@ -34,7 +34,9 @@ create table if not exists public.centros (
   ultima_revision  timestamptz,
   ultima_vista     timestamptz,
   confianza        text not null default 'media'
-                     check (confianza in ('alta', 'media', 'baja'))
+                     check (confianza in ('alta', 'media', 'baja')),
+  lat              double precision,
+  lng              double precision
 );
 
 create unique index if not exists centros_fuente_external_id_uidx
@@ -123,7 +125,9 @@ create table if not exists public.servicios_ayuda (
   fuente_nombre  text not null,
   fuente_url     text not null,
   confianza      text not null default 'media'
-                   check (confianza in ('alta', 'media', 'baja'))
+                   check (confianza in ('alta', 'media', 'baja')),
+  lat            double precision,
+  lng            double precision
 );
 
 alter table public.servicios_ayuda enable row level security;

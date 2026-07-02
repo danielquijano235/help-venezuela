@@ -45,7 +45,7 @@ function pointIcon(color: string, shape: 'circle' | 'diamond') {
 }
 
 export function MapaPage() {
-  const { points, loading, geocoding, progress, error, usingFallback } = useMapPoints();
+  const { points, loading, error, usingFallback } = useMapPoints();
 
   const [visibleEstados, setVisibleEstados] = useState<Set<Estado>>(
     () => new Set(ESTADOS.map((e) => e.value)),
@@ -93,9 +93,8 @@ export function MapaPage() {
         Mapa de puntos en Venezuela
       </h1>
       <p className="mt-2 text-ink/70">
-        Centros de acopio y servicios de ayuda ubicados sobre un mapa. Las direcciones se
-        ubican automáticamente y pueden tardar unos segundos la primera vez. Cuando no hay
-        una dirección exacta, el punto se ubica a nivel de ciudad.
+        Centros de acopio y servicios de ayuda ubicados sobre un mapa. Cuando no hay una
+        dirección exacta, el punto se ubica a nivel de ciudad.
       </p>
 
       {!loading && usingFallback && (
@@ -118,12 +117,6 @@ export function MapaPage() {
 
       {!loading && (
         <>
-          {geocoding && (
-            <p className="mt-4 font-mono text-xs uppercase tracking-wide text-ink/50">
-              Ubicando puntos en el mapa… {progress.done}/{progress.total}
-            </p>
-          )}
-
           <div className="mt-4 flex flex-col gap-4 lg:flex-row">
             <div className="flex w-full flex-col gap-3 rounded-lg border border-ink/15 bg-white p-3 text-sm shadow-sm lg:w-56 lg:shrink-0">
               <div>
@@ -309,7 +302,7 @@ export function MapaPage() {
             </div>
           </div>
 
-          {!geocoding && points.length === 0 && (
+          {points.length === 0 && (
             <p className="mt-4 text-center text-sm text-ink/50">
               Todavía no hay puntos con dirección para mostrar en el mapa.
             </p>

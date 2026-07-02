@@ -21,6 +21,8 @@ const baseCentro = {
   ultima_revision: '2026-06-27T12:00:00-05:00',
   ultima_vista: '2026-06-27T12:00:00-05:00',
   confianza: 'media',
+  lat: null,
+  lng: null,
 } satisfies Omit<Centro, 'id' | 'nombre' | 'direccion' | 'external_id'>;
 
 export const FALLBACK_CENTROS: Centro[] = [
