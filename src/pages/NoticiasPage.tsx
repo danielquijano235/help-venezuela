@@ -7,7 +7,7 @@ export function NoticiasPage() {
   const { noticias, loading, error, usingFallback, retry } = useNoticias();
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-8">
+    <main className="mx-auto max-w-5xl px-4 py-8">
       <BackLink to="/" label="Volver al inicio" />
       <p className="mt-4 font-mono text-xs font-semibold uppercase tracking-wider text-flag">
         Quiero entender
@@ -46,15 +46,15 @@ export function NoticiasPage() {
         </p>
       )}
 
-      <div className="mt-6 flex flex-col gap-4">
-        {loading && <LoadingSpinner label="Cargando noticias..." />}
+      {loading && <LoadingSpinner label="Cargando noticias..." />}
 
-        {!loading && !error && noticias.length === 0 && (
-          <p className="py-16 text-center text-ink/50">Todavía no hay noticias cargadas.</p>
-        )}
+      {!loading && !error && noticias.length === 0 && (
+        <p className="mt-6 py-16 text-center text-ink/50">Todavía no hay noticias cargadas.</p>
+      )}
 
-        {!loading &&
-          noticias.map((noticia) => (
+      {!loading && noticias.length > 0 && (
+        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {noticias.map((noticia) => (
             <article
               key={noticia.id}
               className="flex flex-col gap-2 rounded-xl border border-ink/15 bg-white p-4 shadow-sm"
@@ -71,19 +71,20 @@ export function NoticiasPage() {
                 )}
               </div>
               <h2 className="font-semibold text-ink">{noticia.titulo}</h2>
-              <p className="text-sm text-ink/70">{noticia.resumen}</p>
+              <p className="line-clamp-3 text-sm text-ink/70">{noticia.resumen}</p>
               <a
                 href={noticia.fuente_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-1 flex w-fit items-center gap-1 text-sm font-medium text-ink/60 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-route"
+                className="mt-auto flex w-fit items-center gap-1 text-sm font-medium text-ink/60 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-route"
               >
                 <ExternalLink className="h-4 w-4" />
                 Fuente: {noticia.fuente_nombre}
               </a>
             </article>
           ))}
-      </div>
+        </div>
+      )}
     </main>
   );
 }

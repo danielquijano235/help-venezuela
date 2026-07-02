@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { AlertTriangle, ArrowUp, RefreshCw } from 'lucide-react';
 import { useCentros } from '../hooks/useCentros';
+import { useNoticias } from '../hooks/useNoticias';
 import { FilterBar } from '../components/FilterBar';
 import { CenterCard } from '../components/CenterCard';
 import { LoadingSpinner } from '../components/LoadingSpinner';
@@ -12,6 +13,7 @@ import type { Estado, TipoDonacion } from '../types/centro';
 
 export function ListingPage() {
   const { centros, loading, error, usingFallback, retry } = useCentros();
+  const { noticias } = useNoticias();
   const topRef = useRef<HTMLDivElement>(null);
   const directoryRef = useRef<HTMLDivElement>(null);
   const [searchParams] = useSearchParams();
@@ -73,6 +75,11 @@ export function ListingPage() {
     [centros]
   );
   const cityCount = useMemo(() => new Set(centros.map((centro) => centro.ciudad)).size, [centros]);
+  const noticiasCount = noticias.length;
+  const fuentesCount = useMemo(
+    () => new Set(noticias.map((noticia) => noticia.fuente_nombre)).size,
+    [noticias]
+  );
 
   function scrollToDirectory() {
     window.requestAnimationFrame(() => {
@@ -113,6 +120,8 @@ export function ListingPage() {
         urgentCount={urgentCount}
         verifiedCount={verifiedCount}
         cityCount={cityCount}
+        noticiasCount={noticiasCount}
+        fuentesCount={fuentesCount}
         onShowAll={showAllCenters}
         onSelectDonation={selectDonation}
       />

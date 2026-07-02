@@ -7,6 +7,8 @@ interface ActionCardsProps {
   urgentCount: number;
   verifiedCount: number;
   cityCount: number;
+  noticiasCount: number;
+  fuentesCount: number;
   onShowAll: () => void;
   onSelectDonation: (tipo: TipoDonacion) => void;
 }
@@ -16,6 +18,8 @@ export function ActionCards({
   urgentCount,
   verifiedCount,
   cityCount,
+  noticiasCount,
+  fuentesCount,
   onShowAll,
   onSelectDonation,
 }: ActionCardsProps) {
@@ -32,7 +36,7 @@ export function ActionCards({
           Sin menús complicados. Elige tu situación y te llevamos directo a lo que importa.
         </p>
 
-        <div className="mx-auto mt-6 flex max-w-fit flex-wrap items-center justify-center gap-x-5 gap-y-2 rounded-full bg-ink px-6 py-3 font-mono text-xs uppercase tracking-wider text-paper">
+        <div className="mx-auto mt-6 flex max-w-xl flex-wrap items-center justify-center gap-x-5 gap-y-3 rounded-3xl bg-ink px-6 py-4 font-mono text-xs uppercase tracking-wider text-paper">
           <Stat value={centrosCount} label="centros" />
           <span className="text-paper/25">•</span>
           <Stat value={urgentCount} label="urgentes" accent="text-signal" />
@@ -40,6 +44,10 @@ export function ActionCards({
           <Stat value={verifiedCount} label="verificados" accent="text-moss" />
           <span className="text-paper/25">•</span>
           <Stat value={cityCount} label="ciudades" accent="text-flag" />
+          <span className="text-paper/25">•</span>
+          <Stat value={noticiasCount} label="noticias" accent="text-route" />
+          <span className="text-paper/25">•</span>
+          <Stat value={fuentesCount} label="fuentes" />
         </div>
       </div>
 
