@@ -389,17 +389,24 @@ function stripHtmlTags(value: string): string {
 }
 
 function decodeHtmlEntities(value: string): string {
-  return value
-    .replace(/&amp;/g, '&')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&#160;/g, ' ')
-    .replace(/&#8230;/g, '…')
-    .replace(/&aacute;/g, 'á')
-    .replace(/&eacute;/g, 'é')
-    .replace(/&iacute;/g, 'í')
-    .replace(/&oacute;/g, 'ó')
-    .replace(/&uacute;/g, 'ú')
-    .replace(/&ntilde;/g, 'ñ');
+  return (
+    value
+      // redporvenezuela.com's feed double-encodes entities (literal
+      // "&amp;#160;" instead of "&#160;"), so &amp; must be unescaped
+      // first or the numeric replacements below never match.
+      .replace(/&amp;/g, '&')
+      // Numeric character references (decimal and hex) cover apostrophes
+      // (&#x27;/&#39;), curly quotes (&#8220;/&#8221;), ellipsis (&#8230;),
+      // nbsp (&#160;), etc. in one pass instead of listing each by hand.
+      .replace(/&#x([0-9a-fA-F]+);/g, (_, hex: string) => String.fromCodePoint(parseInt(hex, 16)))
+      .replace(/&#(\d+);/g, (_, dec: string) => String.fromCodePoint(parseInt(dec, 10)))
+      .replace(/&quot;/g, '"')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&aacute;/g, 'á')
+      .replace(/&eacute;/g, 'é')
+      .replace(/&iacute;/g, 'í')
+      .replace(/&oacute;/g, 'ó')
+      .replace(/&uacute;/g, 'ú')
+      .replace(/&ntilde;/g, 'ñ')
+  );
 }
