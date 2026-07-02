@@ -103,15 +103,22 @@ siendo manual desde Supabase.
 
 ### Noticias y servicios de ayuda
 
-A diferencia de los centros, no hay un directorio en vivo para scrapear (son notas de
-prensa sueltas, no una fuente estructurada). `/api/sync-informacion` corre 1 vez al dia
-(desfasado del cron de centros) y hace `upsert` de dos arrays mantenidos a mano en el
-propio archivo (`getNoticias()` / `getServiciosAyuda()`), cada item citando una fuente real.
+`servicios_ayuda` no tiene fuente en vivo (son lineas/contactos, no un directorio
+estructurado): `getServiciosAyuda()` en `api/sync-informacion.ts` es un array mantenido a
+mano, cada item citando una fuente real.
 
-Para agregar mas contenido: edita esos arrays en `api/sync-informacion.ts` con datos reales
-y su fuente, y haz push — el cron del dia siguiente los sube solo, sin tocar el SQL Editor
-de Supabase otra vez. El `upsert` usa `(fuente_nombre, titulo)` para noticias y
-`(fuente_nombre, nombre)` para servicios de ayuda, asi que no crea filas duplicadas.
+`noticias` combina ese mismo tipo de array curado (`getNoticias()`) con un scrape en vivo
+de `redporvenezuela.com/oficial` — a diferencia de un articulo de prensa suelto, esa pagina
+si es un directorio estructurado (titulo, fuente, fecha relativa por tarjeta), asi que se
+puede leer en vivo igual que `/centros`. Trae hasta 50 noticias por corrida, todas marcadas
+`confianza: 'baja'` porque el propio sitio las etiqueta "Sin verificar".
+
+`/api/sync-informacion` corre 1 vez al dia (desfasado del cron de centros) y hace `upsert`
+de todo junto. Para agregar mas contenido curado a mano: edita `getServiciosAyuda()` o
+`getNoticias()` en `api/sync-informacion.ts` con datos reales y su fuente, y haz push — el
+cron del dia siguiente los sube solo, sin tocar el SQL Editor de Supabase otra vez. El
+`upsert` usa `(fuente_nombre, titulo)` para noticias y `(fuente_nombre, nombre)` para
+servicios de ayuda, asi que no crea filas duplicadas.
 
 Para probarlo manualmente:
 

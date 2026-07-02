@@ -112,13 +112,23 @@ abstracted into a shared generic hook, consistent with the rest of the codebase 
 abstracting this pattern either.
 
 `api/sync-informacion.ts` is called by Vercel Cron once a day (`vercel.json`, offset from
-the centros cron). Unlike `scrape-centros.ts`, there's no live source to scrape — news and
-help-service contacts are reported once in prose news articles, not a structured directory
-— so this function's `getNoticias()`/`getServiciosAyuda()` are hand-maintained arrays (same
-idea as `get<Ciudad>SeedCentros()`), each item citing a real source. "Adding more" means
-editing those two arrays and pushing; the daily cron re-upserts them (`onConflict:
-fuente_nombre,titulo` / `fuente_nombre,nombre`) so nobody needs to touch the Supabase SQL
-editor again after the initial seed.
+the centros cron). `servicios_ayuda` has no live source (help-line contacts are reported
+once in prose articles, not a structured directory), so `getServiciosAyuda()` is a
+hand-maintained array (same idea as `get<Ciudad>SeedCentros()`), each item citing a real
+source — "adding more" means editing that array and pushing.
+
+`noticias` is different: it combines that same kind of hand-curated array (`getNoticias()`)
+with a **live scrape** of `redporvenezuela.com/oficial` (`parseRedPorVenezuelaOficial`) —
+unlike a plain news article, that page *is* a structured directory (consistent per-card
+markup: title in an `aria-label`, excerpt in a `<blockquote>`, source/city separated by
+`•`, a real source link, and a relative timestamp like "hace 15 h" that gets converted to
+an absolute ISO date at scrape time). Every scraped item is forced to `confianza: 'baja'`
+since the site itself labels them "Sin verificar", and results are capped at
+`MAX_SCRAPED_NOTICIAS` (50). Both arrays get deduped (`dedupeNoticias`, same
+`fuente_nombre:titulo` key as the DB's unique index) before the upsert, since Postgres
+rejects an `upsert` that hits the same conflict target twice in one call. The daily cron
+re-upserts everything (`onConflict: fuente_nombre,titulo` / `fuente_nombre,nombre`) so
+nobody needs to touch the Supabase SQL editor again after the initial seed.
 
 ### Routing
 
