@@ -38,6 +38,10 @@ const LA_OPINION_CUCUTA_URL =
 const EL_HERALDO_BARRANQUILLA_URL =
   'https://www.elheraldo.co/atlantico/2026/06/26/quiere-ayudar-a-venezuela-estos-son-otros-centros-de-acopio-en-barranquilla-que-reciben-donaciones/';
 const TUBARCO_CALI_URL = 'https://tubarco.news/centros-de-acopio-para-venezuela-en-cali-donde-donar-ayudas/';
+const EL_UNIVERSAL_CARTAGENA_URL =
+  'https://www.eluniversal.com.co/cartagena/2026/06/26/estos-son-los-centros-de-acopio-en-cartagena-para-apoyar-a-afectados-en-venezuela/';
+const LA_PATRIA_MANIZALES_URL =
+  'https://www.lapatria.com/manizales/manizales-se-une-para-ayudar-venezuela-asi-funciona-el-centro-de-acopio-con-alimentos';
 
 const COLOMBIA_CITIES = [
   'Bogotá',
@@ -50,6 +54,9 @@ const COLOMBIA_CITIES = [
   'Barranquilla',
   'Bucaramanga',
   'Valledupar',
+  'Cartagena',
+  'Santa Marta',
+  'Manizales',
   'Colombia',
 ];
 
@@ -82,6 +89,9 @@ export default async function handler(req: HandlerRequest, res: HandlerResponse)
     ...getCucutaSeedCentros(nowIso),
     ...getBarranquillaSeedCentros(nowIso),
     ...getCaliSeedCentros(nowIso),
+    ...getCartagenaSeedCentros(nowIso),
+    ...getSantaMartaSeedCentros(nowIso),
+    ...getManizalesSeedCentros(nowIso),
   ];
   const scrapeErrors: string[] = [];
 
@@ -388,6 +398,98 @@ function getCaliSeedCentros(nowIso: string): ScrapedCentro[] {
       tipos_donacion: ['comida', 'ropa', 'otros'],
       descripcion: 'Punto de acopio reportado por TuBarco Noticias. Verificar vigencia antes de donar.',
       external_id: 'cali-luchando-por-un-sueno-2026-06',
+    },
+  ];
+}
+
+function getCartagenaSeedCentros(nowIso: string): ScrapedCentro[] {
+  const base = {
+    ciudad: 'Cartagena',
+    estado: 'activo',
+    telefono: null,
+    whatsapp: null,
+    publicacion_url: EL_UNIVERSAL_CARTAGENA_URL,
+    verificado: false,
+    fuente_nombre: 'El Universal (Cartagena)',
+    fuente_url: EL_UNIVERSAL_CARTAGENA_URL,
+    ultima_revision: '2026-06-30T12:00:00-05:00',
+    ultima_vista: nowIso,
+    confianza: 'media',
+  } satisfies Omit<
+    ScrapedCentro,
+    'nombre' | 'organizacion' | 'direccion' | 'tipos_donacion' | 'descripcion' | 'external_id'
+  >;
+
+  return [
+    {
+      ...base,
+      nombre: 'Centro Intégrate Cartagena - Barrio Líbano',
+      organizacion: null,
+      direccion: 'Carrera 49 #31B-125, barrio Líbano',
+      tipos_donacion: ['comida', 'higiene', 'panales', 'otros'],
+      descripcion:
+        'Reportado por El Universal: alimentos no perecederos, artículos de emergencia (linternas, pilas) y aseo personal. Horario 8:00 a.m. a 4:30 p.m., recibe hasta el 3 de julio. Verificar vigencia antes de donar.',
+      external_id: 'cartagena-integrate-libano-2026-06',
+    },
+    {
+      ...base,
+      nombre: 'Oficina de Gestión Social - Plaza de la Aduana',
+      organizacion: 'Alcaldía Distrital de Cartagena',
+      direccion: 'Plaza de la Aduana',
+      tipos_donacion: ['comida', 'higiene', 'panales', 'otros'],
+      descripcion:
+        'Reportado por El Universal: alimentos no perecederos, artículos de emergencia y aseo personal. Horario 8:00 a.m. a 4:30 p.m., recibe hasta el 3 de julio. Verificar vigencia antes de donar.',
+      external_id: 'cartagena-gestion-social-aduana-2026-06',
+    },
+  ];
+}
+
+function getSantaMartaSeedCentros(nowIso: string): ScrapedCentro[] {
+  return [
+    {
+      ciudad: 'Santa Marta',
+      estado: 'activo',
+      telefono: null,
+      whatsapp: null,
+      publicacion_url: EL_UNIVERSAL_CARTAGENA_URL,
+      verificado: false,
+      fuente_nombre: 'El Universal (Cartagena)',
+      fuente_url: EL_UNIVERSAL_CARTAGENA_URL,
+      ultima_revision: '2026-06-30T12:00:00-05:00',
+      ultima_vista: nowIso,
+      confianza: 'baja',
+      nombre: 'Punto de acopio Parque La Tenería',
+      organizacion: null,
+      direccion: 'Carrera 2 con Calle 1D36, Parque La Tenería (cerca a Playa Los Cocos)',
+      tipos_donacion: ['comida', 'higiene', 'otros'],
+      descripcion:
+        'Reportado por El Universal: alimentos no perecederos y aseo personal. Horario 7:00 a.m. a 6:00 p.m., recibe hasta el 1 de julio. Verificar vigencia antes de donar.',
+      external_id: 'santa-marta-parque-la-tenaria-2026-06',
+    },
+  ];
+}
+
+function getManizalesSeedCentros(nowIso: string): ScrapedCentro[] {
+  return [
+    {
+      ciudad: 'Manizales',
+      estado: 'activo',
+      telefono: null,
+      whatsapp: null,
+      publicacion_url: LA_PATRIA_MANIZALES_URL,
+      verificado: false,
+      fuente_nombre: 'La Patria',
+      fuente_url: LA_PATRIA_MANIZALES_URL,
+      ultima_revision: '2026-06-27T12:00:00-05:00',
+      ultima_vista: nowIso,
+      confianza: 'media',
+      nombre: 'Moka Coffee - Las Palmas',
+      organizacion: null,
+      direccion: 'Las Palmas',
+      tipos_donacion: ['comida', 'medicina', 'ropa', 'otros'],
+      descripcion:
+        'Reportado por La Patria: alimentos, medicinas, ropa e insumos médicos para los afectados por los terremotos en Venezuela. Verificar vigencia antes de donar.',
+      external_id: 'manizales-moka-coffee-las-palmas-2026-06',
     },
   ];
 }

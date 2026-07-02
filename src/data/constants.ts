@@ -25,6 +25,9 @@ export const CIUDADES = [
   'Barranquilla',
   'Bucaramanga',
   'Valledupar',
+  'Cartagena',
+  'Santa Marta',
+  'Manizales',
 ] as const;
 
 export const TIPOS_DONACION: { value: TipoDonacion; label: string; icon: LucideIcon }[] = [

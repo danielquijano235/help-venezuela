@@ -144,6 +144,38 @@ function getNoticias(): Noticia[] {
         'https://www.infobae.com/venezuela/2026/06/29/terremoto-en-venezuela-plataformas-en-colombia-permiten-transferencias-de-dinero-sin-cobro-de-comision-asi-funciona/',
       confianza: 'media',
     },
+    {
+      titulo: 'Delcy Rodríguez crea comisión presidencial para evaluar viviendas y extiende suspensión de clases',
+      resumen:
+        'El Ejecutivo venezolano ordenó inspeccionar con un sistema de semáforo (verde/amarillo/rojo) las viviendas e infraestructura afectadas por los sismos, y extendió la suspensión de clases una semana más.',
+      fecha_publicacion: '2026-06-29T00:00:00-04:00',
+      ciudad: null,
+      fuente_nombre: 'Infobae',
+      fuente_url:
+        'https://www.infobae.com/venezuela/2026/06/29/delcy-rodriguez-habilito-una-comision-para-inspeccionar-las-viviendas-afectadas-por-los-terremotos-en-venezuela/',
+      confianza: 'alta',
+    },
+    {
+      titulo: 'China enviará 14,7 millones de dólares en ayuda humanitaria a Venezuela',
+      resumen:
+        'El gobierno chino anunció el envío de suministros de emergencia y ayuda para la reconstrucción, además de imágenes satelitales de las zonas afectadas para apoyar las labores de rescate.',
+      fecha_publicacion: '2026-06-29T00:00:00-04:00',
+      ciudad: null,
+      fuente_nombre: 'teleSUR',
+      fuente_url: 'https://www.telesurtv.net/china-ayuda-humanitaria-venezuela-sismos/',
+      confianza: 'alta',
+    },
+    {
+      titulo: 'Cancillería de Colombia habilita canal para enviar ayuda médica a Venezuela',
+      resumen:
+        'El gobierno colombiano estableció un procedimiento oficial para canalizar ayuda médica hacia Venezuela, como parte de la respuesta humanitaria a los terremotos.',
+      fecha_publicacion: '2026-06-26T00:00:00-05:00',
+      ciudad: null,
+      fuente_nombre: 'El Tiempo',
+      fuente_url:
+        'https://www.eltiempo.com/mundo/venezuela/como-ayudar-a-los-afectados-por-los-terremotos-en-venezuela-organizaciones-y-canales-oficiales-para-donar-3567513',
+      confianza: 'media',
+    },
   ];
 }
 
