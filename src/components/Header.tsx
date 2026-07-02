@@ -11,17 +11,23 @@ const NAV_LINKS = [
 export function Header() {
   return (
     <header className="border-b-2 border-ink bg-paper">
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-4">
-        <NavLink to="/" end className="flex items-baseline gap-2">
+      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-3 px-4 py-4 md:grid-cols-[auto_1fr] md:items-center md:gap-x-6 lg:grid-cols-[auto_minmax(12rem,1fr)_auto]">
+        <NavLink to="/" end className="w-fit">
           <span className="font-display text-2xl font-extrabold uppercase leading-none tracking-tight text-ink">
             Help<span className="text-signal">Venezuela</span>
           </span>
-          <span className="hidden font-mono text-[0.65rem] uppercase tracking-widest text-ink/50 sm:inline">
-            Red de acopio · Colombia
-          </span>
         </NavLink>
 
-        <nav className="flex flex-wrap items-center gap-x-5 gap-y-2">
+        <div className="flex items-center justify-between gap-3 border-y border-ink/15 py-2 font-mono text-[0.65rem] font-medium uppercase tracking-[0.18em] text-ink/55 sm:w-fit sm:justify-start sm:border-y-0 sm:py-0 md:justify-self-end lg:justify-self-center">
+          <span className="whitespace-nowrap">Red de acopio</span>
+          <span className="h-1 w-1 flex-none rounded-full bg-signal" aria-hidden="true" />
+          <span className="whitespace-nowrap">Colombia</span>
+        </div>
+
+        <nav
+          className="flex flex-wrap items-center gap-x-4 gap-y-2 md:col-span-2 md:justify-end lg:col-span-1"
+          aria-label="Navegacion principal"
+        >
           {NAV_LINKS.map(({ to, label, end }) => (
             <NavLink
               key={to}
@@ -45,8 +51,8 @@ export function Header() {
               }`
             }
           >
-            <Plus className="h-4 w-4" />
-            Agregar centro
+            <Plus className="h-4 w-4" aria-hidden="true" />
+            <span className="whitespace-nowrap">Agregar centro</span>
           </NavLink>
         </nav>
       </div>
